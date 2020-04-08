@@ -1,9 +1,21 @@
-#define dirPin 2
-#define stepPin 3
-int setpoint = 0;
-int current = 0;
+/* Perfect Settings:
+ * 1/32 microstepping (6400 pulses/rev)
+ * 0.5A is more than enough for moving an iPhone
+ * vertically but more current may be needed for
+ * a larger camera. Motors are stone-cold @ 0.5A
+ * 
+ * Full travel is rougly 100,000 pulses.
+ * Maximum speed is about 15 microseconds between
+ * pulses.
+ */
+
+#define enPin 4
+#define dirPin 3
+#define stepPin 2
+long setpoint = 0;
+long current = 0;
 int speed = 50;
-bool kill = false;
+bool kill = true;
 
 void setup() {
   // Declare pins as output:
@@ -33,11 +45,16 @@ void loop() {
       speed = Serial.parseInt();
       Serial.print("Speed = ");
       Serial.println(speed);
+    } else if (Serial.peek() == 'c') {
+      setpoint = 0;
+      current = 0;
+      Serial.println("Home");
     }
     flush();
   }
 
   if (!kill) {
+    digitalWrite(enPin, LOW);
     if (setpoint > current) {
       digitalWrite(dirPin, LOW);
       digitalWrite(stepPin, HIGH);
@@ -55,6 +72,8 @@ void loop() {
       current--;
     }
   }
+  if(kill)
+    digitalWrite(4, HIGH);
 }
 
 void flush() {
