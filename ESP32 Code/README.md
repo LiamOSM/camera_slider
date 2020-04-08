@@ -1,0 +1,1 @@
+To store the HTML file on the ESP32, SPIFFS must be used. 
