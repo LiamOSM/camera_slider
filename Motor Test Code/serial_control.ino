@@ -19,6 +19,7 @@ bool kill = true;
 
 void setup() {
   // Declare pins as output:
+  pinMode(enPin, OUTPUT);
   pinMode(stepPin, OUTPUT);
   pinMode(dirPin, OUTPUT);
   digitalWrite(dirPin, LOW);
