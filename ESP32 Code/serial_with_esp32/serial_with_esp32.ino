@@ -1,29 +1,52 @@
 /* Perfect Settings:
- * 1/32 microstepping (6400 pulses/rev)
- * 0.5A is more than enough for moving an iPhone
- * vertically but more current may be needed for
- * a larger camera. Motors are stone-cold @ 0.5A
- * 
- * Full travel is rougly 100,000 pulses.
- * Maximum speed is about 15 microseconds between
- * pulses.
- */
+   1/32 microstepping (6400 pulses/rev)
+   0.5A is more than enough for moving an iPhone
+   vertically but more current may be needed for
+   a larger camera. Motors are stone-cold @ 0.5A
+
+   Full travel is rougly 100,000 pulses.
+   Maximum speed is about 15 microseconds between
+   pulses.
+*/
 #define enPin 19
 #define dirPin 18
 #define stepPin 5
 
+#define rLim 22
+#define lLim 23
+
+long length = 0;
 long setpoint = 0;
 long current = 0;
 int speed = 50;
+int calSpeed = 25;
 bool kill = true;
+
+void IRAM_ATTR rLimISR() { // zero position (home)
+  current = 0;
+  kill = true;
+  //Serial.println(current);
+}
+void IRAM_ATTR lLimISR() { // positive limit
+  kill = true;
+  Serial.println(current);
+}
 
 void setup() {
   // Declare pins as output:
   pinMode(stepPin, OUTPUT);
   pinMode(dirPin, OUTPUT);
   pinMode(enPin, OUTPUT);
+  pinMode(rLim, INPUT_PULLUP);
+  pinMode(lLim, INPUT_PULLUP);
+  attachInterrupt(rLim, rLimISR, FALLING);
+  attachInterrupt(lLim, lLimISR, FALLING);
   digitalWrite(dirPin, LOW);
   Serial.begin(9600);
+  while(1){
+    calibrate();
+  }
+  current = length;
 }
 
 void loop() {
@@ -79,4 +102,33 @@ void flush() {
   while (Serial.available() > 0) {
     char t = Serial.read();
   }
+}
+
+void calibrate() {
+  detachInterrupt(rLim);
+  detachInterrupt(lLim);
+  digitalWrite(enPin, LOW);
+  unsigned long temp = 0;
+  digitalWrite(dirPin, HIGH); // to move right
+  while (digitalRead(rLim) != 0) {
+    // move right until the limit is reached
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(calSpeed);
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(calSpeed);
+  }
+  digitalWrite(dirPin, LOW); // to move left
+  delay(250);
+  while (digitalRead(lLim) != 0) {
+    // move left until the limit is reached, while counting steps
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(calSpeed);
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(calSpeed);
+    temp++;
+  }
+  delay(250);
+  length = temp;
+  Serial.print("Length: ");
+  Serial.println(temp);
 }
