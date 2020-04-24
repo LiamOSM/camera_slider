@@ -2,7 +2,7 @@
 #include "ESPAsyncWebServer.h"
 
 const char* ssid = "ESP32";
-const char* password = "password";
+const char* password = "ESP32password";
 
 AsyncWebServer server(80);
 
@@ -71,7 +71,6 @@ void setup(){
   IPAddress IP = WiFi.softAPIP();
   Serial.print("\nAccess Point IP address: ");
   Serial.println(IP);
-  server.begin();
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html, processor);
