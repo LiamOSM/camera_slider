@@ -1,7 +1,7 @@
 #include <WiFi.h>
 
-const char* ssid     = "ESP32";
-const char* password = "123456789";
+const char* ssid = "ESP32";
+const char* password = "ESP32password";
 
 // Set web server port number to 80
 WiFiServer server(80);
@@ -17,11 +17,9 @@ int pos2 = 0;
 void setup() {
   Serial.begin(115200);
 
-  Serial.println("Setting up WiFi...");
   WiFi.softAP(ssid, password);
-  Serial.println("WiFi connected.");
-  Serial.println("IP address: ");
   IPAddress IP = WiFi.softAPIP();
+  Serial.print("\nAccess Point IP address: ");
   Serial.println(IP);
   server.begin();
 }
@@ -47,7 +45,7 @@ void loop(){
             client.println("Content-type:text/html");
             client.println("Connection: close");
             client.println();
-            
+
             // Display the HTML web page
             client.println("<!DOCTYPE html><html>");
             client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
@@ -59,9 +57,9 @@ void loop(){
             client.println("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>");
                      
             // Web Page
-            client.println("</head><body><h1>ESP32 Slider Test</h1>");
+            client.println("</head><body><h1>ESP32 Slider</h1>");
             client.println("<p>Position: <span id=\"servoPos\"></span></p>");          
-            client.println("<input type=\"range\" min=\"0\" max=\"1000\" class=\"slider\" id=\"servoSlider\" onchange=\"servo(this.value)\" value=\""+valueString+"\"/>");
+            client.println("<input type=\"range\" min=\"0\" max=\"180\" class=\"slider\" id=\"servoSlider\" onchange=\"servo(this.value)\" value=\""+valueString+"\"/>");
             
             client.println("<script>var slider = document.getElementById(\"servoSlider\");");
             client.println("var servoP = document.getElementById(\"servoPos\"); servoP.innerHTML = slider.value;");
@@ -69,16 +67,13 @@ void loop(){
             client.println("$.ajaxSetup({timeout:1000}); function servo(pos) { ");
             client.println("$.get(\"/?value=\" + pos + \"&\"); {Connection: close};}</script>");
            
-            client.println("</body></html>");      
+            client.println("</body></html>");     
             
             //GET /?value=180& HTTP/1.1
             if(header.indexOf("GET /?value=")>=0) {
               pos1 = header.indexOf('=');
               pos2 = header.indexOf('&');
               valueString = header.substring(pos1+1, pos2);
-              
-              //Rotate the servo
-              Serial.println("Rotating \"Servo\"");
               Serial.println(valueString); 
             }         
             // The HTTP response ends with another blank line
