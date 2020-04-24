@@ -1,8 +1,8 @@
 #include "WiFi.h"
 #include "ESPAsyncWebServer.h"
 
-const char* ssid = "****";
-const char* password = "****";
+const char* ssid = "ESP32";
+const char* password = "password";
 
 AsyncWebServer server(80);
 
@@ -67,15 +67,11 @@ String processor(const String& var){
 void setup(){
   Serial.begin(9600);
 
-  WiFi.begin(ssid, password);
-  Serial.print("Connecting");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.print(".");
-  }
-
-  Serial.print("\nIP Address: ");
-  Serial.println(WiFi.localIP());
+  WiFi.softAP(ssid, password);
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("\nAccess Point IP address: ");
+  Serial.println(IP);
+  server.begin();
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html, processor);
