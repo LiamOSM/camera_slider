@@ -22,6 +22,7 @@ void setup() {
   pinMode(LED, OUTPUT);
   ledcSetup(ledChannel, freq, resolution);
   ledcAttachPin(LED, ledChannel);
+  ledcWrite(0, 255);
 
   Serial.begin(115200);
 
