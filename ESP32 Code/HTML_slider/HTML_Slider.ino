@@ -1,7 +1,11 @@
 #include <WiFi.h>
 
-const char* ssid     = "ESP32";
-const char* password = "123456789";
+const char* ssid     = "*********";
+const char* password = "*********";
+const int LED = 2;        // built-in LED on pin 2
+const int freq = 5000;    // PWM frequency
+const int ledChannel = 0; // ???
+const int resolution = 8; // resolution {8, 10, 12, 15}
 
 // Set web server port number to 80
 WiFiServer server(80);
@@ -15,18 +19,24 @@ int pos1 = 0;
 int pos2 = 0;
 
 void setup() {
+  pinMode(LED, OUTPUT);
+  ledcSetup(ledChannel, freq, resolution);
+  ledcAttachPin(LED, ledChannel);
+
   Serial.begin(115200);
 
-  Serial.println("Setting up WiFi...");
-  WiFi.softAP(ssid, password);
-  Serial.println("WiFi connected.");
-  Serial.println("IP address: ");
-  IPAddress IP = WiFi.softAPIP();
-  Serial.println(IP);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi..");
+  }
+
+  Serial.println(WiFi.localIP());
   server.begin();
 }
 
-void loop(){
+void loop() {
   WiFiClient client = server.available();   // Listen for incoming clients
 
   if (client) {                             // If a new client connects,
@@ -52,16 +62,16 @@ void loop(){
             client.println("<!DOCTYPE html><html>");
             client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
             client.println("<link rel=\"icon\" href=\"data:,\">");
-            // CSS to style the on/off buttons 
+            // CSS to style the on/off buttons
             // Feel free to change the background-color and font-size attributes to fit your preferences
-            client.println("<style>body { text-align: center; font-family: \"Trebuchet MS\", Arial; margin-left:auto; margin-right:auto;}");
-            client.println(".slider { width: 300px; }</style>");
+            client.println("<style>body { text-align: center; margin-left:auto; margin-right:auto;}");
+            client.println(".slider { width: 800px; }</style>");
             client.println("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>");
 
             // Web Page
             client.println("</head><body><h1>ESP32 Slider Test</h1>");
-            client.println("<p>Position: <span id=\"servoPos\"></span></p>");          
-            client.println("<input type=\"range\" min=\"0\" max=\"1000\" class=\"slider\" id=\"servoSlider\" onchange=\"servo(this.value)\" value=\""+valueString+"\"/>");
+            client.println("<p>Position: <span id=\"servoPos\"></span></p>");
+            client.println("<input type=\"range\" min=\"0\" max=\"100\" class=\"slider\" id=\"servoSlider\" onchange=\"servo(this.value)\" value=\"" + valueString + "\"/>");
 
             client.println("<script>var slider = document.getElementById(\"servoSlider\");");
             client.println("var servoP = document.getElementById(\"servoPos\"); servoP.innerHTML = slider.value;");
@@ -69,18 +79,20 @@ void loop(){
             client.println("$.ajaxSetup({timeout:1000}); function servo(pos) { ");
             client.println("$.get(\"/?value=\" + pos + \"&\"); {Connection: close};}</script>");
 
-            client.println("</body></html>");      
+            client.println("</body></html>");
 
             //GET /?value=180& HTTP/1.1
-            if(header.indexOf("GET /?value=")>=0) {
+            if (header.indexOf("GET /?value=") >= 0) {
               pos1 = header.indexOf('=');
               pos2 = header.indexOf('&');
-              valueString = header.substring(pos1+1, pos2);
+              valueString = header.substring(pos1 + 1, pos2);
 
               //Rotate the servo
-              Serial.println("Rotating \"Servo\"");
-              Serial.println(valueString); 
-            }         
+              Serial.println("Setting LED Brightness to ");
+              Serial.println(valueString);
+              int brightness = 255 * valueString.toInt() / 100;
+              ledcWrite(0, brightness);
+            }
             // The HTTP response ends with another blank line
             client.println();
             // Break out of the while loop
