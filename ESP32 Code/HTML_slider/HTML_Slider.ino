@@ -71,7 +71,7 @@ void loop() {
 
             // Web Page
             client.println("</head><body><h1>ESP32 Slider Test</h1>");
-            client.println("<p>Position: <span id=\"servoPos\"></span></p>");
+            client.println("<p>Brightness: <span id=\"servoPos\"></span></p>");
             client.println("<input type=\"range\" min=\"0\" max=\"100\" class=\"slider\" id=\"servoSlider\" onchange=\"servo(this.value)\" value=\"" + valueString + "\"/>");
 
             client.println("<script>var slider = document.getElementById(\"servoSlider\");");
