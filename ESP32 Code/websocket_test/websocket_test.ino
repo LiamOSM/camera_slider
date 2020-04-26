@@ -11,7 +11,7 @@ const char *msg_get_led = "getLEDState";
 const int dns_port = 53;
 const int http_port = 80;
 const int ws_port = 1337;
-const int led_pin = 15;
+const int led_pin = 2;
  
 // Globals
 AsyncWebServer server(80);
@@ -113,7 +113,7 @@ void onPageNotFound(AsyncWebServerRequest *request) {
 void setup() {
   // Init LED and turn off
   pinMode(led_pin, OUTPUT);
-  digitalWrite(led_pin, LOW);
+  digitalWrite(led_pin, HIGH);
  
   // Start Serial port
   Serial.begin(115200);
