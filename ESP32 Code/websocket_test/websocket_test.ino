@@ -21,7 +21,7 @@ int led_state = 0;
 
 // Callback: receiving any WebSocket message
 void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size_t length) {
-
+  String str = (char *)payload;
   // Figure out the type of WebSocket event
   switch (type) {
 
@@ -43,7 +43,7 @@ void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size
     case WStype_TEXT:
 
       // Print out raw message
-      Serial.printf("[%u] Received text: %s\n", client_num, payload);
+      Serial.printf("[%u] Received text: ", client_num);
 
       // Set LED
       if ( strcmp((char *)payload, "toggleLED") == 0 ) {
@@ -57,7 +57,13 @@ void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size
         Serial.printf("Sending to [%u]: %s\n", client_num, msg_buf);
         webSocket.sendTXT(client_num, msg_buf);
 
-        // Message not recognized
+      // Set LED brightness
+      } else if (str.indexOf("B") != -1 ) {
+        sprintf(msg_buf, "%d", led_state);
+        Serial.print("Slider input received: ");
+        Serial.println(str);
+
+      // Message not recognized
       } else {
         Serial.println("[%u] Message not recognized");
       }

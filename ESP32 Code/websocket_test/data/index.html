@@ -10,11 +10,13 @@ var output;
 var button;
 var canvas;
 var context;
+var slider;
 
 // This is called when the page finishes loading
 function init() {
 
     // Assign page elements to variables
+    slider = document.getElementById("slider");
     button = document.getElementById("toggleButton");
     output = document.getElementById("output");
     canvas = document.getElementById("led");
@@ -102,6 +104,11 @@ function onPress() {
     doSend("getLEDState");
 }
 
+function onSlide(){
+  var brightness = slider.value.toString();
+  doSend("B"+brightness);
+}
+
 // Call the init function as soon as the page loads
 window.addEventListener("load", init, false);
 
@@ -114,6 +121,7 @@ window.addEventListener("load", init, false);
 
 <table>
     <tr>
+        <td><input id="slider" type="range" min="0" max="100" step="1" oninput="onSlide();" value="50"></td>
         <td><button id="toggleButton" onclick="onPress()" disabled>Toggle LED</button></td>
         <td><canvas id="led" width="50" height="50"></canvas></td>
     </tr>
