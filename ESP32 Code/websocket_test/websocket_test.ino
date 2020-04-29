@@ -10,11 +10,11 @@ const char *msg_toggle_led = "toggleLED";
 const char *msg_get_led = "getLEDState";
 const int dns_port = 53;
 const int http_port = 80;
-const int ws_port = 1337;
+const int ws_port = 1024;
 const int led_pin = 2;
 
 AsyncWebServer server(80);
-WebSocketsServer webSocket = WebSocketsServer(1337);
+WebSocketsServer webSocket = WebSocketsServer(ws_port);
 char msg_buf[10];
 int led_state = 0;
 
