@@ -8,9 +8,8 @@
 var url = "ws://192.168.4.1:1024/";
 var output;
 var button;
-var canvas;
-var context;
 var slider;
+var holdButton;
 
 // This is called when the page finishes loading
 function init() {
@@ -19,16 +18,7 @@ function init() {
     slider = document.getElementById("slider");
     button = document.getElementById("toggleButton");
     output = document.getElementById("output");
-    canvas = document.getElementById("led");
-
-    // Draw circle in canvas
-    context = canvas.getContext("2d");
-    context.arc(25, 25, 15, 0, Math.PI * 2, false);
-    context.lineWidth = 3;
-    context.strokeStyle = "black";
-    context.stroke();
-    context.fillStyle = "black";
-    context.fill();
+    holdButton = document.getElementById("holdButton");
 
     // Connect to WebSocket server
     wsConnect(url);
@@ -70,18 +60,12 @@ function onClose(evt) {
 // Called when a message is received from the server
 function onMessage(evt) {
     // the message is called "evt.data"
-
-    // Update circle graphic with LED state
     switch(evt.data) {
         case "0":
             // led is off
-            context.fillStyle = "black";
-            context.fill();
             break;
         case "1":
             // led is on
-            context.fillStyle = "red";
-            context.fill();
             break;
         default:
             break;
@@ -109,6 +93,14 @@ function onSlide(){
   doSend("B"+brightness);
 }
 
+function start(){
+  doSend("BtnDown");
+}
+
+function end(){
+  doSend("BtnUp");
+}
+
 // Call the init function as soon as the page loads
 window.addEventListener("load", init, false);
 
@@ -123,6 +115,7 @@ window.addEventListener("load", init, false);
     <tr>
         <td><input id="slider" type="range" min="0" max="100" step="1" oninput="onSlide();" value="50"></td>
         <td><button id="toggleButton" onclick="onPress()" disabled>Toggle LED</button></td>
-        <td><canvas id="led" width="50" height="50"></canvas></td>
+        <td><button id="holdButton" onmousedown="start()" onmouseup="end()">Click and hold</button></td>
+
     </tr>
 </table>
