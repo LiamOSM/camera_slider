@@ -75,24 +75,24 @@ void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size
   }
 }
 
-// Callback: send homepage
 void onIndexRequest(AsyncWebServerRequest *request) {
+  // Callback: send homepage
   IPAddress remote_ip = request->client()->remoteIP();
   Serial.println("[" + remote_ip.toString() +
                  "] HTTP GET request of " + request->url());
   request->send(SPIFFS, "/index.html", "text/html");
 }
 
-// Callback: send style sheet
 void onCSSRequest(AsyncWebServerRequest *request) {
+  // Callback: send style sheet
   IPAddress remote_ip = request->client()->remoteIP();
   Serial.println("[" + remote_ip.toString() +
                  "] HTTP GET request of " + request->url());
   request->send(SPIFFS, "/style.css", "text/css");
 }
 
-// Callback: send 404 if requested file does not exist
 void onPageNotFound(AsyncWebServerRequest *request) {
+  // Callback: send 404 if requested file does not exist
   IPAddress remote_ip = request->client()->remoteIP();
   Serial.println("[" + remote_ip.toString() +
                  "] HTTP GET request of " + request->url());
@@ -117,7 +117,6 @@ void setup() {
 
   // Print our IP address
   Serial.println();
-  Serial.println("AP running");
   Serial.print("My IP address: ");
   Serial.println(WiFi.softAPIP());
 
