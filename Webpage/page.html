@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<title>Camera Slider</title>
+
+<script language="javascript" type="text/javascript">
+
+var url = "ws://192.168.4.1:1024/";
+
+
+var slider;
+var sliderValue;
+var jogLeftBtn;
+var jogRightBtn;
+
+var loopNoneRadio;
+var loopOnceRadio;
+var loopForeverRadio;
+
+var startField;
+var currentToStartBtn;
+var endField;
+var currentToEndBtn;
+var swapBtn;
+
+var runBtn;
+var pauseBtn;
+var resetBtn;
+
+var speedRadio;
+var durationRadio;
+var speedField;
+
+var calibrateBtn;
+
+// This is called when the page finishes loading
+function init() {
+
+  // Assign page elements to variables
+  slider = document.getElementById("slider");
+  sliderValue = document.getElementById("sliderValue");
+  sliderValue.innerHTML = 69;
+
+  jogLeftBtn = document.getElementById("jogLeftBtn");
+  jogRightBtn = document.getElementById("jogRightBtn");
+
+  loopNoneRadio = document.getElementById("loopNoneRadio");
+  loopOnceRadio = document.getElementById("loopOnceRadio");
+  loopForeverRadio = document.getElementById("loopForeverRadio");
+
+  startField = document.getElementById("startField");
+  currentToStartBtn = document.getElementById("currentToStartBtn");
+  endField = document.getElementById("endField");
+  currentToEndBtn = document.getElementById("currentToEndBtn");
+  swapBtn = document.getElementById("swapBtn");
+
+  runBtn = document.getElementById("runBtn");
+  pauseBtn = document.getElementById("pauseBtn");
+  resetBtn = document.getElementById("resetBtn");
+
+  speedRadio = document.getElementById("speedRadio");
+  durationRadio = document.getElementById("durationRadio");
+  speedField = document.getElementById("speedField");
+
+  calibrateBtn = document.getElementById("calibrateBtn");
+
+  // Connect to WebSocket server
+  wsConnect(url);
+}
+
+// Call this to connect to the WebSocket server
+function wsConnect(url) {
+
+  // Connect to WebSocket server
+  websocket = new WebSocket(url);
+
+  // Assign callbacks
+  websocket.onopen = function(evt) { onOpen(evt) };
+  websocket.onclose = function(evt) { onClose(evt) };
+  websocket.onmessage = function(evt) { onMessage(evt) };
+  websocket.onerror = function(evt) { onError(evt) };
+}
+
+// Called when a WebSocket connection is established with the server
+function onOpen(evt) {
+
+// enable buttons
+
+}
+
+// Called when the WebSocket connection is closed
+function onClose(evt) {
+
+  // Disable buttons
+
+  // Try to reconnect after a few seconds
+  setTimeout(function() { wsConnect(url) }, 2000);
+}
+
+// Called when a message is received from the server
+function onMessage(evt) {
+  // the message is called "evt.data"
+}
+
+// Called when a WebSocket error occurs
+function onError(evt) {
+  // sucks to suck!
+}
+
+// Sends a message to the server (and prints it to the console)
+function doSend(message) {
+  websocket.send(message);
+}
+
+// Call the init function as soon as the page loads
+window.addEventListener("load", init, false);
+
+function sliderChanged() {
+  sliderValue.innerHTML = slider.value;
+}
+
+function jogLeft(){
+  slider.value--;
+  sliderChanged();
+}
+
+function jogRight(){
+  slider.value++;
+  sliderChanged();
+}
+
+</script>
+
+
+<!-- The actual webpage HTML is below -->
+
+<style>
+.positionSlider {
+  width: 800px;
+}
+
+.positionalStuff {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0%);
+}
+
+.main {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 10%);
+}
+</style>
+
+<center><h2>Position</h2></center>
+
+<body>
+
+  <div class="positionalStuff">
+    <button id="jogLeftBtn" onclick="jogLeft()" >&#8592</button>
+    <input id="slider" type="range" min="0" max="1000" step="1" oninput="sliderChanged();" value="69" class="positionSlider">
+    <button id="jogRightBtn" onclick="jogRight()" >&#8594</button>
+  </div>
+
+  <div class="main">
+    <p><strong>Value: </strong><span id="sliderValue"></span>mm</p>
+
+    <p>
+      <strong>Loop Mode:</strong><br>
+      <input type="radio" id="loopNoneRadio" name="loopGroup" value="loop1" checked>
+      <label for="loopNoneRadio">No Loop</label><br>
+      <input type="radio" id="loopOnceRadio" name="loopGroup" value="loop2">
+      <label for="loopOnceRadio">Loop Once</label><br>
+      <input type="radio" id="loopForeverRadio" name="loopGroup" value="loop3">
+      <label for="loopForeverRadio">Loop Forever</label>
+    </p>
+  </div>
+
+</body>
