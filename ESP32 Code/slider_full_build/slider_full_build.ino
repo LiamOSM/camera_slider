@@ -1,9 +1,149 @@
+#include <WiFi.h>
+#include <SPIFFS.h>
+#include <ESPAsyncWebServer.h>
+#include <WebSocketsServer.h>
+
+// Constants
+const char *ssid = "ESP32-AP";
+const char *password =  "123456789";
+const char *msg_toggle_led = "toggleLED";
+const char *msg_get_led = "getLEDState";
+const int dns_port = 53;
+const int http_port = 80;
+const int ws_port = 1024;
+const int led_pin = 2;
+
+AsyncWebServer server(80);
+WebSocketsServer webSocket = WebSocketsServer(ws_port);
+char msg_buf[10];
+int led_state = 0;
+
+
+// Callback: receiving any WebSocket message
+void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size_t length) {
+  String str = (char *)payload;
+  // Figure out the type of WebSocket event
+  switch (type) {
+
+    // Client has disconnected
+    case WStype_DISCONNECTED:
+      Serial.printf("[%u] Disconnected!\n", client_num);
+      break;
+
+    // New client has connected
+    case WStype_CONNECTED:
+      {
+        IPAddress ip = webSocket.remoteIP(client_num);
+        Serial.printf("[%u] Connection from ", client_num);
+        Serial.println(ip.toString());
+      }
+      break;
+
+    // Handle text messages from client
+    case WStype_TEXT:
+
+      // Print out raw message
+      Serial.printf("[%u] Received text: ", client_num);
+
+      // Set LED
+      if ( strcmp((char *)payload, "toggleLED") == 0 ) {
+        led_state = led_state ? 0 : 1;
+        Serial.printf("Setting LED to %u\n", led_state);
+        digitalWrite(led_pin, led_state);
+
+      // Report the state of the LED
+      } else if ( strcmp((char *)payload, "getLEDState") == 0 ) {
+        sprintf(msg_buf, "%d", led_state);
+        Serial.printf("Sending to [%u]: %s\n", client_num, msg_buf);
+        webSocket.sendTXT(client_num, msg_buf);
+
+      // Set LED brightness
+      } else if (str.indexOf("B") != -1 ) {
+        sprintf(msg_buf, "%d", led_state);
+        Serial.print("Slider input received: ");
+        Serial.println(str);
+
+      // Message not recognized
+      } else {
+        Serial.println("[%u] Message not recognized");
+      }
+      break;
+
+    // For everything else: do nothing
+    case WStype_BIN:
+    case WStype_ERROR:
+    case WStype_FRAGMENT_TEXT_START:
+    case WStype_FRAGMENT_BIN_START:
+    case WStype_FRAGMENT:
+    case WStype_FRAGMENT_FIN:
+    default:
+      break;
+  }
+}
+
+void onIndexRequest(AsyncWebServerRequest *request) {
+  // Callback: send homepage
+  IPAddress remote_ip = request->client()->remoteIP();
+  Serial.println("[" + remote_ip.toString() +
+                 "] HTTP GET request of " + request->url());
+  request->send(SPIFFS, "/index.html", "text/html");
+}
+
+void onCSSRequest(AsyncWebServerRequest *request) {
+  // Callback: send style sheet
+  IPAddress remote_ip = request->client()->remoteIP();
+  Serial.println("[" + remote_ip.toString() +
+                 "] HTTP GET request of " + request->url());
+  request->send(SPIFFS, "/style.css", "text/css");
+}
+
+void onPageNotFound(AsyncWebServerRequest *request) {
+  // Callback: send 404 if requested file does not exist
+  IPAddress remote_ip = request->client()->remoteIP();
+  Serial.println("[" + remote_ip.toString() +
+                 "] HTTP GET request of " + request->url());
+  request->send(404, "text/plain", "Error (404)\nYou've made a huge mistake!");
+}
+
 void setup() {
-  // put your setup code here, to run once:
+  pinMode(led_pin, OUTPUT);
+  digitalWrite(led_pin, LOW);
+
+  // Start Serial port
+  Serial.begin(115200);
+
+  // Make sure we can read the file system
+  if ( !SPIFFS.begin()) {
+    Serial.println("Error mounting SPIFFS");
+    while (1);
+  }
+
+  // Start access point
+  WiFi.softAP(ssid, password);
+
+  // Print our IP address
+  Serial.println();
+  Serial.print("My IP address: ");
+  Serial.println(WiFi.softAPIP());
+
+  // On HTTP request for root, provide index.html file
+  server.on("/", HTTP_GET, onIndexRequest);
+
+  // On HTTP request for style sheet, provide style.css
+  server.on("/style.css", HTTP_GET, onCSSRequest);
+
+  // Handle requests for pages that do not exist
+  server.onNotFound(onPageNotFound);
+
+  // Start web server
+  server.begin();
+
+  // Start WebSocket server and assign callback
+  webSocket.begin();
+  webSocket.onEvent(onWebSocketEvent);
 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+  webSocket.loop();
 }
