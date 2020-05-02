@@ -4,6 +4,7 @@
 
 <script language="javascript" type="text/javascript">
 
+// default IP for ESP32 in AP mode
 var url = "ws://192.168.4.1:1024/";
 
 
@@ -202,7 +203,7 @@ function setState(newState){
       // enable run & reset, disable pause
       runBtn.disabled = true;
       pauseBtn.disabled = false;
-      resetBtn.disabled = false;
+      resetBtn.disabled = true;
       break;
     case 2:
       stateSpan.innerHTML = "Paused";
@@ -223,13 +224,13 @@ function setState(newState){
 
 <style>
 .positionSlider {
-  width: 800px;
+  width: 400px;
 }
 
 .positionalStuff {
   position: absolute;
   left: 50%;
-  transform: translate(-50%, 0%);
+  transform: translate(-50%, 10px);
 }
 
 .main {
@@ -241,6 +242,11 @@ function setState(newState){
 
 <center><h2>Position: <span id="sliderValue"></span> mm</h2></center>
 <center><strong>Status: </strong><span id="stateSpan"></span></center>
+<center>
+  <button id="runBtn" onclick="run()">Run</button>
+  <button id="pauseBtn" onclick="pause()">Pause</button>
+  <button id="resetBtn" onclick="reset()">Reset</button>
+</center>
 
 <body>
 
@@ -259,11 +265,6 @@ function setState(newState){
       <label for="loopOnceRadio">Loop Once</label><br>
       <input type="radio" id="loopForeverRadio" name="loopGroup" value="loop3">
       <label for="loopForeverRadio">Loop Forever</label>
-    </p>
-    <p>
-      <button id="runBtn" onclick="run()">Run</button>
-      <button id="pauseBtn" onclick="pause()">Pause</button>
-      <button id="resetBtn" onclick="reset()">Reset</button>
     </p>
   </div>
 
