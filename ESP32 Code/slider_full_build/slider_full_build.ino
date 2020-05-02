@@ -11,17 +11,15 @@ const char *msg_get_led = "getLEDState";
 const int dns_port = 53;
 const int http_port = 80;
 const int ws_port = 1024;
-const int led_pin = 2;
 
 AsyncWebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(ws_port);
 char msg_buf[10];
-int led_state = 0;
 
+String wsMessageStr;
 
 // Callback: receiving any WebSocket message
 void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size_t length) {
-  String str = (char *)payload;
   // Figure out the type of WebSocket event
   switch (type) {
 
@@ -41,32 +39,13 @@ void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size
 
     // Handle text messages from client
     case WStype_TEXT:
-
+      // The message, as a String object (easier to work with in my opinion)
+      wsMessageStr = (char *)payload;
       // Print out raw message
       Serial.printf("[%u] Received text: ", client_num);
-
-      // Set LED
-      if ( strcmp((char *)payload, "toggleLED") == 0 ) {
-        led_state = led_state ? 0 : 1;
-        Serial.printf("Setting LED to %u\n", led_state);
-        digitalWrite(led_pin, led_state);
-
-      // Report the state of the LED
-      } else if ( strcmp((char *)payload, "getLEDState") == 0 ) {
-        sprintf(msg_buf, "%d", led_state);
-        Serial.printf("Sending to [%u]: %s\n", client_num, msg_buf);
-        webSocket.sendTXT(client_num, msg_buf);
-
-      // Set LED brightness
-      } else if (str.indexOf("B") != -1 ) {
-        sprintf(msg_buf, "%d", led_state);
-        Serial.print("Slider input received: ");
-        Serial.println(str);
-
-      // Message not recognized
-      } else {
-        Serial.println("[%u] Message not recognized");
-      }
+      Serial.println(wsMessageStr);
+      // handle the request
+      handleWSMessage();
       break;
 
     // For everything else: do nothing
@@ -106,9 +85,6 @@ void onPageNotFound(AsyncWebServerRequest *request) {
 }
 
 void setup() {
-  pinMode(led_pin, OUTPUT);
-  digitalWrite(led_pin, LOW);
-
   // Start Serial port
   Serial.begin(115200);
 
@@ -146,4 +122,10 @@ void setup() {
 
 void loop() {
   webSocket.loop();
+}
+
+// This function is called when a websocket request is
+// received and the String "wsMessageStr" is updated
+void handleWSMessage() {
+
 }

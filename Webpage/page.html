@@ -33,6 +33,9 @@ var speedField;
 
 var calibrateBtn;
 
+var state;
+var stateSpan;
+
 // This is called when the page finishes loading
 function init() {
 
@@ -40,6 +43,8 @@ function init() {
   slider = document.getElementById("slider");
   sliderValue = document.getElementById("sliderValue");
   sliderValue.innerHTML = 69;
+
+  stateSpan = document.getElementById("stateSpan");
 
   jogLeftBtn = document.getElementById("jogLeftBtn");
   jogRightBtn = document.getElementById("jogRightBtn");
@@ -63,6 +68,12 @@ function init() {
   speedField = document.getElementById("speedField");
 
   calibrateBtn = document.getElementById("calibrateBtn");
+
+  // States:
+  // 0 = idle
+  // 1 = running
+  // 2 = paused
+  setState(0);
 
   // Connect to WebSocket server
   wsConnect(url);
@@ -149,6 +160,35 @@ function jogRightEnd() {
   clearInterval(counter)
 }
 
+function run(){
+  setState(1); // running state is 1
+}
+
+function pause(){
+  setState(2); // paused state is 2
+}
+
+function reset(){
+  setState(0); // idle state is 0
+}
+
+function setState(newState){
+  state = newState;
+  switch(state) {
+    case 0:
+      stateSpan.innerHTML = "Idle";
+      break;
+    case 1:
+      stateSpan.innerHTML = "Running";
+      break;
+    case 2:
+      stateSpan.innerHTML = "Paused";
+      break;
+    default:
+      stateSpan.innerHTML = "Error";
+  }
+}
+
 </script>
 
 
@@ -168,11 +208,12 @@ function jogRightEnd() {
 .main {
   position: absolute;
   left: 50%;
-  transform: translate(-50%, 10%);
+  transform: translate(-50%, 20px);
 }
 </style>
 
 <center><h2>Position: <span id="sliderValue"></span> mm</h2></center>
+<center><strong>Status: </strong><span id="stateSpan"></span></center>
 
 <body>
 
@@ -191,6 +232,11 @@ function jogRightEnd() {
       <label for="loopOnceRadio">Loop Once</label><br>
       <input type="radio" id="loopForeverRadio" name="loopGroup" value="loop3">
       <label for="loopForeverRadio">Loop Forever</label>
+    </p>
+    <p>
+      <button id="runBtn" onclick="run()">Run</button>
+      <button id="pauseBtn" onclick="pause()">Pause</button>
+      <button id="resetBtn" onclick="reset()">Reset</button>
     </p>
   </div>
 
