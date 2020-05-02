@@ -4,6 +4,7 @@
 
 <script language="javascript" type="text/javascript">
 
+// default IP for ESP32 in AP mode
 var url = "ws://192.168.4.1:1024/";
 
 
@@ -33,6 +34,9 @@ var speedField;
 
 var calibrateBtn;
 
+var state;
+var stateSpan;
+
 // This is called when the page finishes loading
 function init() {
 
@@ -40,6 +44,8 @@ function init() {
   slider = document.getElementById("slider");
   sliderValue = document.getElementById("sliderValue");
   sliderValue.innerHTML = 69;
+
+  stateSpan = document.getElementById("stateSpan");
 
   jogLeftBtn = document.getElementById("jogLeftBtn");
   jogRightBtn = document.getElementById("jogRightBtn");
@@ -64,6 +70,18 @@ function init() {
 
   calibrateBtn = document.getElementById("calibrateBtn");
 
+  reset();
+
+  // enable run & reset, disable pause
+  runBtn.disabled = false;
+  pauseBtn.disabled = true;
+  resetBtn.disabled = false;
+
+  // remove above three lines and uncomment below three lines
+  // runBtn.disabled = true;
+  // pauseBtn.disabled = true;
+  // resetBtn.disabled = true;
+
   // Connect to WebSocket server
   wsConnect(url);
 }
@@ -83,15 +101,20 @@ function wsConnect(url) {
 
 // Called when a WebSocket connection is established with the server
 function onOpen(evt) {
-
-// enable buttons
-
+  // enable buttons
+  // enable run & reset, disable pause
+  runBtn.disabled = false;
+  pauseBtn.disabled = true;
+  resetBtn.disabled = false;
 }
 
 // Called when the WebSocket connection is closed
 function onClose(evt) {
 
   // Disable buttons
+  // runBtn.disabled = true;
+  // pauseBtn.disabled = true;
+  // resetBtn.disabled = true;
 
   // Try to reconnect after a few seconds
   setTimeout(function() { wsConnect(url) }, 2000);
@@ -149,6 +172,52 @@ function jogRightEnd() {
   clearInterval(counter)
 }
 
+function run(){
+  setState(1); // running state is 1
+}
+
+function pause(){
+  setState(2); // paused state is 2
+}
+
+function reset(){
+  setState(0); // idle state is 0
+  loopNoneRadio.checked = true;
+}
+
+function setState(newState){
+  // States:
+  // 0 = idle
+  // 1 = running
+  // 2 = paused
+  state = newState;
+  switch(state) {
+    case 0:
+      stateSpan.innerHTML = "Idle";
+      // enable run & reset, disable pause
+      runBtn.disabled = false;
+      pauseBtn.disabled = true;
+      resetBtn.disabled = false;
+      break;
+    case 1:
+      stateSpan.innerHTML = "Running";
+      // enable run & reset, disable pause
+      runBtn.disabled = true;
+      pauseBtn.disabled = false;
+      resetBtn.disabled = true;
+      break;
+    case 2:
+      stateSpan.innerHTML = "Paused";
+      // enable run & reset, disable pause
+      runBtn.disabled = false;
+      pauseBtn.disabled = true;
+      resetBtn.disabled = false;
+      break;
+    default:
+      stateSpan.innerHTML = "Error";
+  }
+}
+
 </script>
 
 
@@ -156,23 +225,29 @@ function jogRightEnd() {
 
 <style>
 .positionSlider {
-  width: 800px;
+  width: 400px;
 }
 
 .positionalStuff {
   position: absolute;
   left: 50%;
-  transform: translate(-50%, 0%);
+  transform: translate(-50%, 10px);
 }
 
 .main {
   position: absolute;
   left: 50%;
-  transform: translate(-50%, 10%);
+  transform: translate(-50%, 20px);
 }
 </style>
 
 <center><h2>Position: <span id="sliderValue"></span> mm</h2></center>
+<center><strong>Status: </strong><span id="stateSpan"></span></center>
+<center>
+  <button id="runBtn" onclick="run()">Run</button>
+  <button id="pauseBtn" onclick="pause()">Pause</button>
+  <button id="resetBtn" onclick="reset()">Reset</button>
+</center>
 
 <body>
 
@@ -185,7 +260,7 @@ function jogRightEnd() {
   <div class="main">
     <p>
       <strong>Loop Mode:</strong><br>
-      <input type="radio" id="loopNoneRadio" name="loopGroup" value="loop1" checked>
+      <input type="radio" id="loopNoneRadio" name="loopGroup" value="loop1">
       <label for="loopNoneRadio">No Loop</label><br>
       <input type="radio" id="loopOnceRadio" name="loopGroup" value="loop2">
       <label for="loopOnceRadio">Loop Once</label><br>

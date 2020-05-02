@@ -4,7 +4,7 @@
 #include <WebSocketsServer.h>
 
 // Constants
-const char *ssid = "ESP32-AP";
+const char *ssid = "ESP32";
 const char *password =  "123456789";
 const char *msg_toggle_led = "toggleLED";
 const char *msg_get_led = "getLEDState";
@@ -65,7 +65,12 @@ void onIndexRequest(AsyncWebServerRequest *request) {
   IPAddress remote_ip = request->client()->remoteIP();
   Serial.println("[" + remote_ip.toString() +
                  "] HTTP GET request of " + request->url());
-  request->send(SPIFFS, "/index.html", "text/html");
+  request->send(SPIFFS, "/page.html", "text/html");
+}
+
+void onFaviconRequest(AsyncWebServerRequest *request) {
+  // Callback: send favicon
+  request->send(SPIFFS, "/favicon.ico", "image/ico");
 }
 
 void onCSSRequest(AsyncWebServerRequest *request) {
@@ -107,6 +112,9 @@ void setup() {
 
   // On HTTP request for style sheet, provide style.css
   server.on("/style.css", HTTP_GET, onCSSRequest);
+
+  // On HTTP request for favicon, provide the icon
+  server.on("/favicon.ico", HTTP_GET, onFaviconRequest);
 
   // Handle requests for pages that do not exist
   server.onNotFound(onPageNotFound);
