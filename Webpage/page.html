@@ -69,11 +69,17 @@ function init() {
 
   calibrateBtn = document.getElementById("calibrateBtn");
 
-  // States:
-  // 0 = idle
-  // 1 = running
-  // 2 = paused
-  setState(0);
+  setState(0); // idle on startup
+
+  // enable run & reset, disable pause
+  runBtn.disabled = false;
+  pauseBtn.disabled = true;
+  resetBtn.disabled = false;
+
+  // remove above three lines and uncomment below three lines
+  // runBtn.disabled = true;
+  // pauseBtn.disabled = true;
+  // resetBtn.disabled = true;
 
   // Connect to WebSocket server
   wsConnect(url);
@@ -94,15 +100,20 @@ function wsConnect(url) {
 
 // Called when a WebSocket connection is established with the server
 function onOpen(evt) {
-
-// enable buttons
-
+  // enable buttons
+  // enable run & reset, disable pause
+  runBtn.disabled = false;
+  pauseBtn.disabled = true;
+  resetBtn.disabled = false;
 }
 
 // Called when the WebSocket connection is closed
 function onClose(evt) {
 
   // Disable buttons
+  runBtn.disabled = true;
+  pauseBtn.disabled = true;
+  resetBtn.disabled = true;
 
   // Try to reconnect after a few seconds
   setTimeout(function() { wsConnect(url) }, 2000);
@@ -173,16 +184,32 @@ function reset(){
 }
 
 function setState(newState){
+  // States:
+  // 0 = idle
+  // 1 = running
+  // 2 = paused
   state = newState;
   switch(state) {
     case 0:
       stateSpan.innerHTML = "Idle";
+      // enable run & reset, disable pause
+      runBtn.disabled = false;
+      pauseBtn.disabled = true;
+      resetBtn.disabled = false;
       break;
     case 1:
       stateSpan.innerHTML = "Running";
+      // enable run & reset, disable pause
+      runBtn.disabled = true;
+      pauseBtn.disabled = false;
+      resetBtn.disabled = false;
       break;
     case 2:
       stateSpan.innerHTML = "Paused";
+      // enable run & reset, disable pause
+      runBtn.disabled = false;
+      pauseBtn.disabled = true;
+      resetBtn.disabled = false;
       break;
     default:
       stateSpan.innerHTML = "Error";
