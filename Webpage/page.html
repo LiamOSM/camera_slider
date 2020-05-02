@@ -11,6 +11,7 @@ var slider;
 var sliderValue;
 var jogLeftBtn;
 var jogRightBtn;
+var counter;
 
 var loopNoneRadio;
 var loopOnceRadio;
@@ -118,14 +119,34 @@ function sliderChanged() {
   sliderValue.innerHTML = slider.value;
 }
 
-function jogLeft(){
+function jogLeftStart() {
+  // do it once right away, in case the press lasts less than 250ms
   slider.value--;
   sliderChanged();
+  // now start the interval timing:
+  counter = setInterval(function() {
+    slider.value--;
+    sliderChanged();
+  }, 250);
 }
 
-function jogRight(){
+function jogLeftEnd() {
+  clearInterval(counter)
+}
+
+function jogRightStart() {
+  // do it once right away, in case the press lasts less than 250ms
   slider.value++;
   sliderChanged();
+  // now start the interval timing:
+  counter = setInterval(function() {
+    slider.value++;
+    sliderChanged();
+  }, 250);
+}
+
+function jogRightEnd() {
+  clearInterval(counter)
 }
 
 </script>
@@ -156,9 +177,9 @@ function jogRight(){
 <body>
 
   <div class="positionalStuff">
-    <button id="jogLeftBtn" onclick="jogLeft()" >&#8592</button>
+    <button id="jogLeftBtn" onmousedown="jogLeftStart()" onmouseup="jogLeftEnd()">&#8592</button>
     <input id="slider" type="range" min="0" max="1000" step="1" oninput="sliderChanged();" value="69" class="positionSlider">
-    <button id="jogRightBtn" onclick="jogRight()" >&#8594</button>
+    <button id="jogRightBtn" onmousedown="jogRightStart()" onmouseup="jogRightEnd()">&#8594</button>
   </div>
 
   <div class="main">
