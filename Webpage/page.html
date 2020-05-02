@@ -70,7 +70,7 @@ function init() {
 
   calibrateBtn = document.getElementById("calibrateBtn");
 
-  setState(0); // idle on startup
+  reset();
 
   // enable run & reset, disable pause
   runBtn.disabled = false;
@@ -112,9 +112,9 @@ function onOpen(evt) {
 function onClose(evt) {
 
   // Disable buttons
-  runBtn.disabled = true;
-  pauseBtn.disabled = true;
-  resetBtn.disabled = true;
+  // runBtn.disabled = true;
+  // pauseBtn.disabled = true;
+  // resetBtn.disabled = true;
 
   // Try to reconnect after a few seconds
   setTimeout(function() { wsConnect(url) }, 2000);
@@ -182,6 +182,7 @@ function pause(){
 
 function reset(){
   setState(0); // idle state is 0
+  loopNoneRadio.checked = true;
 }
 
 function setState(newState){
@@ -259,7 +260,7 @@ function setState(newState){
   <div class="main">
     <p>
       <strong>Loop Mode:</strong><br>
-      <input type="radio" id="loopNoneRadio" name="loopGroup" value="loop1" checked>
+      <input type="radio" id="loopNoneRadio" name="loopGroup" value="loop1">
       <label for="loopNoneRadio">No Loop</label><br>
       <input type="radio" id="loopOnceRadio" name="loopGroup" value="loop2">
       <label for="loopOnceRadio">Loop Once</label><br>
