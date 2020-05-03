@@ -70,6 +70,9 @@ void onIndexRequest(AsyncWebServerRequest *request) {
 
 void onFaviconRequest(AsyncWebServerRequest *request) {
   // Callback: send favicon
+  IPAddress remote_ip = request->client()->remoteIP();
+  Serial.println("[" + remote_ip.toString() +
+                 "] HTTP GET request of " + request->url());
   request->send(SPIFFS, "/favicon.ico", "image/ico");
 }
 
