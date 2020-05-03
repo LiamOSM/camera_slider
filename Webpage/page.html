@@ -186,6 +186,14 @@ function reset(){
   loopNoneRadio.checked = true;
 }
 
+function currentToStart(){
+  startField.value = slider.value;
+}
+
+function currentToEnd(){
+  endField.value = slider.value;
+}
+
 function setState(newState){
   // States:
   // 0 = idle
@@ -240,6 +248,10 @@ function setState(newState){
   left: 50%;
   transform: translate(-50%, 30px);
 }
+
+th, td {
+  padding: 5px;
+}
 </style>
 
 <center><h2>Position: <span id="sliderValue"></span> mm</h2></center>
@@ -253,21 +265,41 @@ function setState(newState){
 <body>
 
   <div class="positionalStuff">
-    <button id="jogLeftBtn" onmousedown="jogLeftStart()" onmouseup="jogLeftEnd()">&#8592</button>
+    <button id="jogLeftBtn" onmousedown="jogLeftStart()" onmouseup="jogLeftEnd()"> < </button>
     <input id="slider" type="range" min="0" max="1000" step="1" oninput="sliderChanged();" value="69" class="positionSlider">
-    <button id="jogRightBtn" onmousedown="jogRightStart()" onmouseup="jogRightEnd()">&#8594</button>
+    <button id="jogRightBtn" onmousedown="jogRightStart()" onmouseup="jogRightEnd()"> > </button>
   </div>
 
   <div class="main">
-    <p>
-      <strong>Loop Mode:</strong><br>
-      <input type="radio" id="loopNoneRadio" name="loopGroup" value="loop1">
-      <label for="loopNoneRadio">No Loop</label><br>
-      <input type="radio" id="loopOnceRadio" name="loopGroup" value="loop2">
-      <label for="loopOnceRadio">Loop Once</label><br>
-      <input type="radio" id="loopForeverRadio" name="loopGroup" value="loop3">
-      <label for="loopForeverRadio">Loop Forever</label>
-    </p>
+    <table>
+      <tr>
+        <td>
+          <input type="radio" id="loopNoneRadio" name="loopGroup" value="loop1">
+          <label for="loopNoneRadio">No Loop</label>
+        </td>
+        <td>Start:</td>
+        <td><input type="number" id="startField" name="startField" min="0" max="1000" value="0"></td>
+        <td>mm</td>
+        <td><button id="currentToStartBtn" onclick="currentToStart()">current</button></td>
+      </tr>
+      <tr>
+        <td>
+          <input type="radio" id="loopOnceRadio" name="loopGroup" value="loop2">
+          <label for="loopOnceRadio">Loop Once</label>
+        </td>
+        <td>End:</td>
+        <td><input type="number" id="endField" name="endField" min="0" max="1000" value="1000"></td>
+        <td>mm</td>
+        <td><button id="currentToEndBtn" onclick="currentToEnd()">current</button></td>
+      </tr>
+      <tr>
+        <td>
+          <input type="radio" id="loopForeverRadio" name="loopGroup" value="loop3">
+          <label for="loopForeverRadio">Loop Forever</label>
+        </td>
+      </tr>
+    </table>
+
   </div>
 
 </body>
