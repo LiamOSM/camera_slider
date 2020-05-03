@@ -265,9 +265,9 @@ th, td {
 <body>
 
   <div class="positionalStuff">
-    <button id="jogLeftBtn" onmousedown="jogLeftStart()" onmouseup="jogLeftEnd()"> < </button>
+    <button id="jogLeftBtn" onmousedown="jogLeftStart()" onmouseup="jogLeftEnd()">&#8592</button>
     <input id="slider" type="range" min="0" max="1000" step="1" oninput="sliderChanged();" value="69" class="positionSlider">
-    <button id="jogRightBtn" onmousedown="jogRightStart()" onmouseup="jogRightEnd()"> > </button>
+    <button id="jogRightBtn" onmousedown="jogRightStart()" onmouseup="jogRightEnd()">&#8594</button>
   </div>
 
   <div class="main">
@@ -279,8 +279,7 @@ th, td {
         </td>
         <td>Start:</td>
         <td><input type="number" id="startField" name="startField" min="0" max="1000" value="0"></td>
-        <td>mm</td>
-        <td><button id="currentToStartBtn" onclick="currentToStart()">current</button></td>
+        <td><button id="currentToStartBtn" onclick="currentToStart()">&#8592 set current</button></td>
       </tr>
       <tr>
         <td>
@@ -289,8 +288,7 @@ th, td {
         </td>
         <td>End:</td>
         <td><input type="number" id="endField" name="endField" min="0" max="1000" value="1000"></td>
-        <td>mm</td>
-        <td><button id="currentToEndBtn" onclick="currentToEnd()">current</button></td>
+        <td><button id="currentToEndBtn" onclick="currentToEnd()">&#8592 set current</button></td>
       </tr>
       <tr>
         <td>
