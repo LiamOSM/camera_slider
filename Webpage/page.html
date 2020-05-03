@@ -207,6 +207,16 @@ function setState(newState){
       runBtn.disabled = false;
       pauseBtn.disabled = true;
       resetBtn.disabled = false;
+      currentToEndBtn.disabled = false;
+      currentToStartBtn.disabled = false;
+      endField.disabled = false;
+      startField.disabled = false;
+      loopNoneRadio.disabled = false;
+      loopOnceRadio.disabled = false;
+      loopForeverRadio.disabled = false;
+      slider.disabled = false;
+      jogLeftBtn.disabled = false;
+      jogRightBtn.disabled = false;
       break;
     case 1:
       stateSpan.innerHTML = "Running";
@@ -214,6 +224,16 @@ function setState(newState){
       runBtn.disabled = true;
       pauseBtn.disabled = false;
       resetBtn.disabled = true;
+      currentToEndBtn.disabled = true;
+      currentToStartBtn.disabled = true;
+      endField.disabled = true;
+      startField.disabled = true;
+      loopNoneRadio.disabled = true;
+      loopOnceRadio.disabled = true;
+      loopForeverRadio.disabled = true;
+      slider.disabled = true;
+      jogLeftBtn.disabled = true;
+      jogRightBtn.disabled = true;
       break;
     case 2:
       stateSpan.innerHTML = "Paused";
@@ -221,6 +241,16 @@ function setState(newState){
       runBtn.disabled = false;
       pauseBtn.disabled = true;
       resetBtn.disabled = false;
+      currentToEndBtn.disabled = true;
+      currentToStartBtn.disabled = true;
+      endField.disabled = true;
+      startField.disabled = true;
+      loopNoneRadio.disabled = true;
+      loopOnceRadio.disabled = true;
+      loopForeverRadio.disabled = true;
+      slider.disabled = true;
+      jogLeftBtn.disabled = true;
+      jogRightBtn.disabled = true;
       break;
     default:
       stateSpan.innerHTML = "Error";
