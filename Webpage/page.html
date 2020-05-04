@@ -75,8 +75,9 @@ function init() {
 
   calibrateBtn = document.getElementById("calibrateBtn");
 
+  // initial values:
   speedSlider.value = 50;
-
+  loopNoneRadio.checked = true;
   speedSpan.innerHTML = "Speed: " + speedSlider.value + "%";
   timeSpan.innerHTML = "Time: " + timeField.value + " min";
   timeField.hidden = true;
@@ -355,7 +356,7 @@ th, td {
         </td>
         <td>Start:</td>
         <td><input type="number" id="startField" name="startField" min="0" max="1000" step="1" value="0"></td>
-        <td><button id="currentToStartBtn" onclick="currentToStart()">&#8592 set current</button></td>
+        <td><button id="currentToStartBtn" onclick="currentToStart()">&#8592 set to current</button></td>
       </tr>
       <tr>
         <td>
@@ -364,7 +365,7 @@ th, td {
         </td>
         <td>End:</td>
         <td><input type="number" id="endField" name="endField" min="0" max="1000" step="1" value="1000"></td>
-        <td><button id="currentToEndBtn" onclick="currentToEnd()">&#8592 set current</button></td>
+        <td><button id="currentToEndBtn" onclick="currentToEnd()">&#8592 set to current</button></td>
       </tr>
       <tr>
         <td>
@@ -377,8 +378,9 @@ th, td {
     <p>
       <center>
         <input id="speedSlider" type="range" min="1" max="100" step="1" oninput="speedSliderChanged()">
-        <span id="speedSpan"></span>
         <input type="number" id="timeField" name="timeField" min="1" max="60" step="1" value="5" onchange="timeFieldChanged()">
+        <br>
+        <span id="speedSpan"></span>
         <span id="timeSpan"></span>
         <br><br>
         <button id="speedTypeBtn" onclick="toggleSpeedType()">Switch to Time</button>
