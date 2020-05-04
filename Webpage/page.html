@@ -27,11 +27,13 @@ var swapBtn;
 
 var runBtn;
 var pauseBtn;
-var resetBtn;
+var stopBtn;
 
-var speedRadio;
-var durationRadio;
-var speedField;
+var speedTypeBtn;
+var timeField;
+var speedSlider;
+var speedSpan;
+var timeSpan;
 
 var calibrateBtn;
 
@@ -63,25 +65,33 @@ function init() {
 
   runBtn = document.getElementById("runBtn");
   pauseBtn = document.getElementById("pauseBtn");
-  resetBtn = document.getElementById("resetBtn");
+  stopBtn = document.getElementById("stopBtn");
 
-  speedRadio = document.getElementById("speedRadio");
-  durationRadio = document.getElementById("durationRadio");
-  speedField = document.getElementById("speedField");
+  speedTypeBtn = document.getElementById("speedTypeBtn");
+  timeField = document.getElementById("timeField");
+  speedSlider = document.getElementById("speedSlider");
+  speedSpan = document.getElementById("speedSpan");
+  timeSpan = document.getElementById("timeSpan");
 
   calibrateBtn = document.getElementById("calibrateBtn");
 
-  reset();
+  speedSlider.value = 50;
+
+  speedSpan.innerHTML = "Speed: " + speedSlider.value + "%";
+  timeSpan.innerHTML = "Time: " + timeField.value + " min";
+  timeField.hidden = true;
+  timeSpan.hidden = true;
+  stop();
 
   // enable run & reset, disable pause
   runBtn.disabled = false;
   pauseBtn.disabled = true;
-  resetBtn.disabled = false;
+  stopBtn.disabled = true;
 
   // remove above three lines and uncomment below three lines
   // runBtn.disabled = true;
   // pauseBtn.disabled = true;
-  // resetBtn.disabled = true;
+  // stopBtn.disabled = true;
 
   // Connect to WebSocket server
   wsConnect(url);
@@ -106,7 +116,7 @@ function onOpen(evt) {
   // enable run & reset, disable pause
   runBtn.disabled = false;
   pauseBtn.disabled = true;
-  resetBtn.disabled = false;
+  stopBtn.disabled = true;
 }
 
 // Called when the WebSocket connection is closed
@@ -115,7 +125,7 @@ function onClose(evt) {
   // Disable buttons
   // runBtn.disabled = true;
   // pauseBtn.disabled = true;
-  // resetBtn.disabled = true;
+  // stopBtn.disabled = true;
 
   // Try to reconnect after a few seconds
   setTimeout(function() { wsConnect(url) }, 2000);
@@ -181,9 +191,8 @@ function pause(){
   setState(2); // paused state is 2
 }
 
-function reset(){
+function stop(){
   setState(0); // idle state is 0
-  loopNoneRadio.checked = true;
 }
 
 function currentToStart(){
@@ -192,6 +201,38 @@ function currentToStart(){
 
 function currentToEnd(){
   endField.value = slider.value;
+}
+
+function toggleSpeedType(){
+  // user specifies a time in minutes
+  if(speedTypeBtn.innerText == "Switch to Time"){
+    speedTypeBtn.innerText = "Switch to Speed";
+    speedSlider.hidden = true;
+    speedSpan.hidden = true;
+    timeField.hidden = false;
+    timeSpan.hidden = false;
+  }
+  // user specifies a speed in percent
+  else{
+    speedTypeBtn.innerText = "Switch to Time";
+    speedSlider.hidden = false;
+    speedSpan.hidden = false;
+    timeField.hidden = true;
+    timeSpan.hidden = true;
+  }
+}
+
+function speedSliderChanged(){
+  speedSpan.innerHTML = "Speed: " + speedSlider.value + "%";
+}
+
+function timeFieldChanged(){
+  if(timeField.value == "1"){
+    timeSpan.innerHTML = "Time: " + timeField.value + " min";
+  }
+  else {
+    timeSpan.innerHTML = "Time: " + timeField.value + " mins";
+  }
 }
 
 function setState(newState){
@@ -206,7 +247,7 @@ function setState(newState){
       // enable run & reset, disable pause
       runBtn.disabled = false;
       pauseBtn.disabled = true;
-      resetBtn.disabled = false;
+      stopBtn.disabled = true;
       currentToEndBtn.disabled = false;
       currentToStartBtn.disabled = false;
       endField.disabled = false;
@@ -217,13 +258,16 @@ function setState(newState){
       slider.disabled = false;
       jogLeftBtn.disabled = false;
       jogRightBtn.disabled = false;
+      speedSlider.disabled = false;
+      speedTypeBtn.disabled = false;
+      timeField.disabled = false;
       break;
     case 1:
       stateSpan.innerHTML = "Running";
       // enable run & reset, disable pause
       runBtn.disabled = true;
       pauseBtn.disabled = false;
-      resetBtn.disabled = true;
+      stopBtn.disabled = true;
       currentToEndBtn.disabled = true;
       currentToStartBtn.disabled = true;
       endField.disabled = true;
@@ -234,13 +278,16 @@ function setState(newState){
       slider.disabled = true;
       jogLeftBtn.disabled = true;
       jogRightBtn.disabled = true;
+      speedSlider.disabled = true;
+      speedTypeBtn.disabled = true;
+      timeField.disabled = true;
       break;
     case 2:
       stateSpan.innerHTML = "Paused";
       // enable run & reset, disable pause
       runBtn.disabled = false;
       pauseBtn.disabled = true;
-      resetBtn.disabled = false;
+      stopBtn.disabled = false;
       currentToEndBtn.disabled = true;
       currentToStartBtn.disabled = true;
       endField.disabled = true;
@@ -251,6 +298,9 @@ function setState(newState){
       slider.disabled = true;
       jogLeftBtn.disabled = true;
       jogRightBtn.disabled = true;
+      speedSlider.disabled = true;
+      speedTypeBtn.disabled = true;
+      timeField.disabled = true;
       break;
     default:
       stateSpan.innerHTML = "Error";
@@ -264,19 +314,13 @@ function setState(newState){
 
 <style>
 .positionSlider {
-  width: 400px;
-}
-
-.positionalStuff {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, 10px);
+  width: 50%;
 }
 
 .main {
   position: absolute;
   left: 50%;
-  transform: translate(-50%, 30px);
+  transform: translate(-50%, 0px);
 }
 
 th, td {
@@ -289,16 +333,18 @@ th, td {
 <center>
   <button id="runBtn" onclick="run()">Run</button>
   <button id="pauseBtn" onclick="pause()">Pause</button>
-  <button id="resetBtn" onclick="reset()">Reset</button>
+  <button id="stopBtn" onclick="stop()">Stop</button>
 </center>
 
 <body>
 
-  <div class="positionalStuff">
-    <button id="jogLeftBtn" onmousedown="jogLeftStart()" onmouseup="jogLeftEnd()">&#8592</button>
-    <input id="slider" type="range" min="0" max="1000" step="1" oninput="sliderChanged();" value="69" class="positionSlider">
-    <button id="jogRightBtn" onmousedown="jogRightStart()" onmouseup="jogRightEnd()">&#8594</button>
-  </div>
+  <p>
+    <center>
+      <button id="jogLeftBtn" onmousedown="jogLeftStart()" onmouseup="jogLeftEnd()">&#8592</button>
+      <input id="slider" type="range" min="0" max="1000" step="1" oninput="sliderChanged()" value="69" class="positionSlider">
+      <button id="jogRightBtn" onmousedown="jogRightStart()" onmouseup="jogRightEnd()">&#8594</button>
+    </center>
+  </p>
 
   <div class="main">
     <table>
@@ -308,7 +354,7 @@ th, td {
           <label for="loopNoneRadio">No Loop</label>
         </td>
         <td>Start:</td>
-        <td><input type="number" id="startField" name="startField" min="0" max="1000" value="0"></td>
+        <td><input type="number" id="startField" name="startField" min="0" max="1000" step="1" value="0"></td>
         <td><button id="currentToStartBtn" onclick="currentToStart()">&#8592 set current</button></td>
       </tr>
       <tr>
@@ -317,7 +363,7 @@ th, td {
           <label for="loopOnceRadio">Loop Once</label>
         </td>
         <td>End:</td>
-        <td><input type="number" id="endField" name="endField" min="0" max="1000" value="1000"></td>
+        <td><input type="number" id="endField" name="endField" min="0" max="1000" step="1" value="1000"></td>
         <td><button id="currentToEndBtn" onclick="currentToEnd()">&#8592 set current</button></td>
       </tr>
       <tr>
@@ -327,6 +373,17 @@ th, td {
         </td>
       </tr>
     </table>
+
+    <p>
+      <center>
+        <input id="speedSlider" type="range" min="1" max="100" step="1" oninput="speedSliderChanged()">
+        <span id="speedSpan"></span>
+        <input type="number" id="timeField" name="timeField" min="1" max="60" step="1" value="5" onchange="timeFieldChanged()">
+        <span id="timeSpan"></span>
+        <br><br>
+        <button id="speedTypeBtn" onclick="toggleSpeedType()">Switch to Time</button>
+      </center>
+    </p>
 
   </div>
 
