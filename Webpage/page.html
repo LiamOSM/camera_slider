@@ -33,7 +33,8 @@ var speedTypeBtn;
 var timeField;
 var speedSlider;
 var speedSpan;
-var timeSpan;
+var timeSpan1;
+var timeSpan2;
 
 var calibrateBtn;
 
@@ -71,7 +72,9 @@ function init() {
   timeField = document.getElementById("timeField");
   speedSlider = document.getElementById("speedSlider");
   speedSpan = document.getElementById("speedSpan");
-  timeSpan = document.getElementById("timeSpan");
+  timeSpan1 = document.getElementById("timeSpan1");
+  timeSpan2 = document.getElementById("timeSpan2");
+  timeSpan2.innerHTML = "Time: "
 
   calibrateBtn = document.getElementById("calibrateBtn");
 
@@ -79,9 +82,10 @@ function init() {
   speedSlider.value = 50;
   loopNoneRadio.checked = true;
   speedSpan.innerHTML = "Speed: " + speedSlider.value + "%";
-  timeSpan.innerHTML = "Time: " + timeField.value + " min";
+  timeSpan1.innerHTML = " mins";
   timeField.hidden = true;
-  timeSpan.hidden = true;
+  timeSpan1.hidden = true;
+  timeSpan2.hidden = true;
   stop();
 
   // enable run & reset, disable pause
@@ -211,7 +215,8 @@ function toggleSpeedType(){
     speedSlider.hidden = true;
     speedSpan.hidden = true;
     timeField.hidden = false;
-    timeSpan.hidden = false;
+    timeSpan1.hidden = false;
+    timeSpan2.hidden = false;
   }
   // user specifies a speed in percent
   else{
@@ -219,7 +224,8 @@ function toggleSpeedType(){
     speedSlider.hidden = false;
     speedSpan.hidden = false;
     timeField.hidden = true;
-    timeSpan.hidden = true;
+    timeSpan1.hidden = true;
+    timeSpan2.hidden = true;
   }
 }
 
@@ -229,10 +235,10 @@ function speedSliderChanged(){
 
 function timeFieldChanged(){
   if(timeField.value == "1"){
-    timeSpan.innerHTML = "Time: " + timeField.value + " min";
+    timeSpan1.innerHTML = " min";
   }
   else {
-    timeSpan.innerHTML = "Time: " + timeField.value + " mins";
+    timeSpan1.innerHTML = " mins";
   }
 }
 
@@ -378,11 +384,12 @@ th, td {
     <p>
       <center>
         <input id="speedSlider" type="range" min="1" max="100" step="1" oninput="speedSliderChanged()">
+        <span id="timeSpan2"></span>
         <input type="number" id="timeField" name="timeField" min="1" max="60" step="1" value="5" onchange="timeFieldChanged()">
+        <span id="timeSpan1"></span>
         <br>
         <span id="speedSpan"></span>
-        <span id="timeSpan"></span>
-        <br><br>
+        <br>
         <button id="speedTypeBtn" onclick="toggleSpeedType()">Switch to Time</button>
       </center>
     </p>
