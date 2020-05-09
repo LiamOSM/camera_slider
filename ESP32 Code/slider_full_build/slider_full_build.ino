@@ -134,8 +134,6 @@ void setup() {
   pinMode(enPin, OUTPUT);
   pinMode(rLim, INPUT_PULLUP);
   pinMode(lLim, INPUT_PULLUP);
-  attachInterrupt(rLim, rLimISR, FALLING);
-  attachInterrupt(lLim, lLimISR, FALLING);
   digitalWrite(dirPin, LOW);
 
   // Make sure we can read the file system
@@ -172,9 +170,10 @@ void setup() {
   webSocket.begin();
   webSocket.onEvent(onWebSocketEvent);
 
+  // No need to calibrate on every power cycle since length comes from EEPROM
   // calibrate();
 
-  // re-enable interrupts
+  // enable interrupts for limit switches
   attachInterrupt(rLim, rLimISR, FALLING);
   attachInterrupt(lLim, lLimISR, FALLING);
 }
