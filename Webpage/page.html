@@ -156,6 +156,7 @@ window.addEventListener("load", init, false);
 
 function sliderChanged() {
   sliderValue.innerHTML = slider.value;
+  doSend(slider.value); // transmit the new desired position to the ESP32
 }
 
 function jogLeftStart() {
