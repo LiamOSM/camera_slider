@@ -43,7 +43,7 @@ void setup() {
   attachInterrupt(lLim, lLimISR, FALLING);
   digitalWrite(dirPin, LOW);
   Serial.begin(9600);
-  while(1){
+  while (1) {
     calibrate();
   }
   current = length;
@@ -109,18 +109,22 @@ void calibrate() {
   detachInterrupt(lLim);
   digitalWrite(enPin, LOW);
   unsigned long temp = 0;
-  digitalWrite(dirPin, HIGH); // to move right
-  while (digitalRead(rLim) != 0) {
-    // move right until the limit is reached
+
+  // Move left (out)
+  digitalWrite(dirPin, LOW);
+  while (digitalRead(lLim) != 0) {
+    // move left until the limit is reached
     digitalWrite(stepPin, HIGH);
     delayMicroseconds(calSpeed);
     digitalWrite(stepPin, LOW);
     delayMicroseconds(calSpeed);
   }
-  digitalWrite(dirPin, LOW); // to move left
   delay(250);
-  while (digitalRead(lLim) != 0) {
-    // move left until the limit is reached, while counting steps
+
+  // Move right (home)
+  digitalWrite(dirPin, HIGH);
+  while (digitalRead(rLim) != 0) {
+    // move right until the limit is reached, while counting steps
     digitalWrite(stepPin, HIGH);
     delayMicroseconds(calSpeed);
     digitalWrite(stepPin, LOW);

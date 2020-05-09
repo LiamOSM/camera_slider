@@ -40,8 +40,8 @@ void IRAM_ATTR rLimISR() { // zero position (home)
   //Serial.println(current);
 }
 void IRAM_ATTR lLimISR() { // positive limit
-  // current = length;
-  kill = true;
+  current = length;
+  // kill = true;
   // Serial.println(current);
 }
 
@@ -224,10 +224,10 @@ void calibrate() {
   digitalWrite(enPin, LOW);
   unsigned long temp = 0;
 
-  // Move right
-  digitalWrite(dirPin, HIGH);
-  while (digitalRead(rLim) != 0) {
-    // move right until the limit is reached
+  // Move left (out)
+  digitalWrite(dirPin, LOW);
+  while (digitalRead(lLim) != 0) {
+    // move left until the limit is reached
     digitalWrite(stepPin, HIGH);
     delayMicroseconds(calSpeed);
     digitalWrite(stepPin, LOW);
@@ -235,10 +235,10 @@ void calibrate() {
   }
   delay(250);
 
-  // move left
-  digitalWrite(dirPin, LOW);
-  while (digitalRead(lLim) != 0) {
-    // move left until the limit is reached, while counting steps
+  // Move right (home)
+  digitalWrite(dirPin, HIGH);
+  while (digitalRead(rLim) != 0) {
+    // move right until the limit is reached, while counting steps
     digitalWrite(stepPin, HIGH);
     delayMicroseconds(calSpeed);
     digitalWrite(stepPin, LOW);
