@@ -3,14 +3,28 @@
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
 
+// Compile-time assertions
+#define enPin 19
+#define dirPin 18
+#define stepPin 5
+#define rLim 22
+#define lLim 23
+
 // Constants
 const char *ssid = "ESP32";
 const char *password =  "123456789";
-const char *msg_toggle_led = "toggleLED";
-const char *msg_get_led = "getLEDState";
 const int dns_port = 53;
 const int http_port = 80;
 const int ws_port = 1024;
+
+// Global Variables
+long length = 0;
+long setpoint = 0;
+long current = 0;
+int speed = 50;
+int calSpeed = 25;
+bool kill = true;
+
 
 AsyncWebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(ws_port);
