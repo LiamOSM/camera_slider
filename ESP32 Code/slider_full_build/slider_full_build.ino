@@ -18,7 +18,7 @@ const int http_port = 80;
 const int ws_port = 1024;
 
 // Global Variables
-long length = 0;
+// long length = 0;
 long setpoint = 0;
 long current = 0;
 int speed = 50;
@@ -39,8 +39,8 @@ void IRAM_ATTR rLimISR() { // zero position (home)
   //Serial.println(current);
 }
 void IRAM_ATTR lLimISR() { // positive limit
-  current = length;
-  // kill = true;
+  // current = length;
+  kill = true;
   // Serial.println(current);
 }
 
@@ -168,12 +168,12 @@ void setup() {
   setpoint = 0;
   kill = false;
   slideinto();
-  
+
   Serial.print("Current position: ");
   Serial.println(current);
   Serial.print("Setpoint: ");
   Serial.println(setpoint);
-  
+
   // re-enable interrupts
   attachInterrupt(rLim, rLimISR, FALLING);
   attachInterrupt(lLim, lLimISR, FALLING);
@@ -187,10 +187,10 @@ void loop() {
 // received and the String "wsMessageStr" is updated
 void handleWSMessage() {
   if (wsMessageStr.charAt(0) == 'm') {
-    int goTo = wsMessageStr.substring(1).toInt();
+    long goTo = 100 * wsMessageStr.substring(1).toInt();
     Serial.print("Go To: ");
     Serial.println(goTo);
-    setpoint = goTo * 100;
+    setpoint = goTo;
     slideinto();
   }
   else if (wsMessageStr.charAt(0) == 'c') {
@@ -204,24 +204,31 @@ void slideinto() {
   Serial.println(current);
   Serial.print("Setpoint: ");
   Serial.println(setpoint);
-  while (!kill && (setpoint != current)) {
-    if (setpoint > current) {
-      digitalWrite(dirPin, LOW);
+  long tempCurrent = current;
+
+  if (setpoint > current)
+    digitalWrite(dirPin, LOW);
+  else
+    digitalWrite(dirPin, HIGH);
+
+  while (!kill && (setpoint != tempCurrent)) {
+//    Serial.println(tempCurrent);
+    if (setpoint > tempCurrent) {
       digitalWrite(stepPin, HIGH);
       delayMicroseconds(speed);
       digitalWrite(stepPin, LOW);
       delayMicroseconds(speed);
-      current++;
+      tempCurrent++;
     }
-    else if (setpoint < current) {
-      digitalWrite(dirPin, HIGH);
+    else if (setpoint < tempCurrent) {
       digitalWrite(stepPin, HIGH);
       delayMicroseconds(speed);
       digitalWrite(stepPin, LOW);
       delayMicroseconds(speed);
-      current--;
+      tempCurrent--;
     }
   }
+  current = tempCurrent;
   Serial.print("Current position: ");
   Serial.println(current);
   Serial.print("Setpoint: ");
@@ -236,7 +243,7 @@ void calibrate() {
   // enable motor driver
   digitalWrite(enPin, LOW);
   // counter to increment
-  unsigned long temp = 0;
+  // unsigned long temp = 0;
   // move right
   digitalWrite(dirPin, HIGH);
 
@@ -248,23 +255,23 @@ void calibrate() {
     delayMicroseconds(calSpeed);
   }
   delay(250); // wait a bit, to kill momentum
-
-  // move left
-  digitalWrite(dirPin, LOW);
-  while (digitalRead(lLim) != 0) {
-    // move left until the limit is reached, while counting steps
-    digitalWrite(stepPin, HIGH);
-    delayMicroseconds(calSpeed);
-    digitalWrite(stepPin, LOW);
-    delayMicroseconds(calSpeed);
-    temp++;
-  }
-  delay(250);
-  length = temp;
-  // update the current position which we know is the length
-  current = length;
+  current = 0;
+  //  // move left
+  //  digitalWrite(dirPin, LOW);
+  //  while (digitalRead(lLim) != 0) {
+  //    // move left until the limit is reached, while counting steps
+  //    digitalWrite(stepPin, HIGH);
+  //    delayMicroseconds(calSpeed);
+  //    digitalWrite(stepPin, LOW);
+  //    delayMicroseconds(calSpeed);
+  //    temp++;
+  //  }
+  //  delay(250);
+  //  length = temp;
+  //  // update the current position which we know is the length
+  //  current = length;
   kill = true; // set this back to true
   Serial.println("Done");
-  Serial.print("Length: ");
-  Serial.println(temp);
+  //  Serial.print("Length: ");
+  //  Serial.println(temp);
 }
