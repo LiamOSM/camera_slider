@@ -2,6 +2,7 @@
 #include <SPIFFS.h>
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
+#include <EEPROM.h>
 
 // Compile-time assertions
 #define enPin 19
@@ -18,7 +19,7 @@ const int http_port = 80;
 const int ws_port = 1024;
 
 // Global Variables
-// long length = 0;
+long sliderLength = 0;
 long setpoint = 0;
 long current = 0;
 int speed = 50;
@@ -122,6 +123,12 @@ void setup() {
   // Start Serial port
   Serial.begin(115200);
 
+  EEPROM.begin(512);
+  EEPROM.get(0, sliderLength);
+  Serial.print("Slider length from EEPROM: ");
+  Serial.print(sliderLength);
+  Serial.println(" steps");
+
   pinMode(stepPin, OUTPUT);
   pinMode(dirPin, OUTPUT);
   pinMode(enPin, OUTPUT);
@@ -144,6 +151,7 @@ void setup() {
   Serial.println();
   Serial.print("My IP address: ");
   Serial.println(WiFi.softAPIP());
+  Serial.println();
 
   // On HTTP request for root, provide index.html file
   server.on("/", HTTP_GET, onIndexRequest);
@@ -164,15 +172,7 @@ void setup() {
   webSocket.begin();
   webSocket.onEvent(onWebSocketEvent);
 
-  calibrate();
-  setpoint = 0;
-  kill = false;
-  slideinto();
-
-  Serial.print("Current position: ");
-  Serial.println(current);
-  Serial.print("Setpoint: ");
-  Serial.println(setpoint);
+  // calibrate();
 
   // re-enable interrupts
   attachInterrupt(rLim, rLimISR, FALLING);
@@ -191,62 +191,27 @@ void handleWSMessage() {
     Serial.print("Go To: ");
     Serial.println(goTo);
     setpoint = goTo;
-    slideinto();
   }
   else if (wsMessageStr.charAt(0) == 'c') {
-    // calibrate
-
+    calibrate();
   }
 }
 
-void slideinto() {
-  Serial.print("Current position: ");
-  Serial.println(current);
-  Serial.print("Setpoint: ");
-  Serial.println(setpoint);
-  long tempCurrent = current;
-
-  if (setpoint > current)
-    digitalWrite(dirPin, LOW);
-  else
-    digitalWrite(dirPin, HIGH);
-
-  while (!kill && (setpoint != tempCurrent)) {
-//    Serial.println(tempCurrent);
-    if (setpoint > tempCurrent) {
-      digitalWrite(stepPin, HIGH);
-      delayMicroseconds(speed);
-      digitalWrite(stepPin, LOW);
-      delayMicroseconds(speed);
-      tempCurrent++;
-    }
-    else if (setpoint < tempCurrent) {
-      digitalWrite(stepPin, HIGH);
-      delayMicroseconds(speed);
-      digitalWrite(stepPin, LOW);
-      delayMicroseconds(speed);
-      tempCurrent--;
-    }
-  }
-  current = tempCurrent;
-  Serial.print("Current position: ");
-  Serial.println(current);
-  Serial.print("Setpoint: ");
-  Serial.println(setpoint);
+// call this function on startup and if the client requests a move to position zero
+void homePosition(){
+  // move in the home direction until the limit switch is triggered
+  // set the current position to zero  
 }
 
 void calibrate() {
   Serial.print("Calibrating...");
-  // disable interrupts, since we want to poll the limit switches mannually
   detachInterrupt(rLim);
   detachInterrupt(lLim);
-  // enable motor driver
   digitalWrite(enPin, LOW);
-  // counter to increment
-  // unsigned long temp = 0;
-  // move right
-  digitalWrite(dirPin, HIGH);
+  unsigned long temp = 0;
 
+  // Move right
+  digitalWrite(dirPin, HIGH);
   while (digitalRead(rLim) != 0) {
     // move right until the limit is reached
     digitalWrite(stepPin, HIGH);
@@ -254,24 +219,26 @@ void calibrate() {
     digitalWrite(stepPin, LOW);
     delayMicroseconds(calSpeed);
   }
-  delay(250); // wait a bit, to kill momentum
-  current = 0;
-  //  // move left
-  //  digitalWrite(dirPin, LOW);
-  //  while (digitalRead(lLim) != 0) {
-  //    // move left until the limit is reached, while counting steps
-  //    digitalWrite(stepPin, HIGH);
-  //    delayMicroseconds(calSpeed);
-  //    digitalWrite(stepPin, LOW);
-  //    delayMicroseconds(calSpeed);
-  //    temp++;
-  //  }
-  //  delay(250);
-  //  length = temp;
-  //  // update the current position which we know is the length
-  //  current = length;
-  kill = true; // set this back to true
-  Serial.println("Done");
-  //  Serial.print("Length: ");
-  //  Serial.println(temp);
+  delay(250);
+  
+  // move left
+  digitalWrite(dirPin, LOW); 
+  while (digitalRead(lLim) != 0) {
+    // move left until the limit is reached, while counting steps
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(calSpeed);
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(calSpeed);
+    temp++;
+  }
+  delay(250);
+  sliderLength = temp;
+  Serial.println("Done.");
+  
+  EEPROM.put(0,sliderLength);
+  EEPROM.commit();
+  Serial.println("Length put in EEPROM");
+  
+  Serial.print("Slider length: ");
+  Serial.println(temp);
 }
