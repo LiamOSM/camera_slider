@@ -32,6 +32,18 @@ char msg_buf[10];
 
 String wsMessageStr;
 
+// Interrupt service routines
+void IRAM_ATTR rLimISR() { // zero position (home)
+  current = 0;
+  kill = true;
+  //Serial.println(current);
+}
+void IRAM_ATTR lLimISR() { // positive limit
+  // something else needs to happen here but I'm not sure what yet
+  kill = true;
+  // Serial.println(current);
+}
+
 // Callback: receiving any WebSocket message
 void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size_t length) {
   // Figure out the type of WebSocket event
@@ -110,6 +122,15 @@ void setup() {
   // Start Serial port
   Serial.begin(115200);
 
+  pinMode(stepPin, OUTPUT);
+  pinMode(dirPin, OUTPUT);
+  pinMode(enPin, OUTPUT);
+  pinMode(rLim, INPUT_PULLUP);
+  pinMode(lLim, INPUT_PULLUP);
+  attachInterrupt(rLim, rLimISR, FALLING);
+  attachInterrupt(lLim, lLimISR, FALLING);
+  digitalWrite(dirPin, LOW);
+
   // Make sure we can read the file system
   if ( !SPIFFS.begin()) {
     Serial.println("Error mounting SPIFFS");
@@ -143,6 +164,9 @@ void setup() {
   webSocket.begin();
   webSocket.onEvent(onWebSocketEvent);
 
+  calibrate();
+  // freewheel
+  digitalWrite(enPin, HIGH);
 }
 
 void loop() {
@@ -157,4 +181,50 @@ void handleWSMessage() {
     Serial.print("Go To: ");
     Serial.println(goTo);
   }
+  else if (wsMessageStr.charAt(0) == 'c') {
+    // calibrate
+
+  }
+}
+
+void calibrate() {
+  Serial.print("Calibrating...");
+  // disable interrupts, since we want to poll the limit switches mannually
+  detachInterrupt(rLim);
+  detachInterrupt(lLim);
+  // enable motor driver
+  digitalWrite(enPin, LOW);
+  // counter to increment
+  unsigned long temp = 0;
+  // move right
+  digitalWrite(dirPin, HIGH);
+
+  while (digitalRead(rLim) != 0) {
+    // move right until the limit is reached
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(calSpeed);
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(calSpeed);
+  }
+  delay(250); // wait a bit, to kill momentum
+
+  // move left
+  digitalWrite(dirPin, LOW);
+  while (digitalRead(lLim) != 0) {
+    // move left until the limit is reached, while counting steps
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(calSpeed);
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(calSpeed);
+    temp++;
+  }
+  delay(250);
+  length = temp;
+  current = length;
+  // re-enable interrupts
+  attachInterrupt(rLim, rLimISR, FALLING);
+  attachInterrupt(lLim, lLimISR, FALLING);
+  Serial.println("Done");
+  Serial.print("Length: ");
+  Serial.println(temp);
 }
