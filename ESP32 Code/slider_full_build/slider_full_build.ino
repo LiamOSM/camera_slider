@@ -39,8 +39,8 @@ void IRAM_ATTR rLimISR() { // zero position (home)
   //Serial.println(current);
 }
 void IRAM_ATTR lLimISR() { // positive limit
-  // something else needs to happen here but I'm not sure what yet
-  kill = true;
+  current = length;
+  // kill = true;
   // Serial.println(current);
 }
 
@@ -165,9 +165,18 @@ void setup() {
   webSocket.onEvent(onWebSocketEvent);
 
   calibrate();
+  setpoint = 0;
   kill = false;
-  // freewheel
-  //  digitalWrite(enPin, HIGH);
+  slideinto();
+  
+  Serial.print("Current position: ");
+  Serial.println(current);
+  Serial.print("Setpoint: ");
+  Serial.println(setpoint);
+  
+  // re-enable interrupts
+  attachInterrupt(rLim, rLimISR, FALLING);
+  attachInterrupt(lLim, lLimISR, FALLING);
 }
 
 void loop() {
@@ -181,7 +190,7 @@ void handleWSMessage() {
     int goTo = wsMessageStr.substring(1).toInt();
     Serial.print("Go To: ");
     Serial.println(goTo);
-    setpoint = goTo;
+    setpoint = goTo * 100;
     slideinto();
   }
   else if (wsMessageStr.charAt(0) == 'c') {
@@ -191,6 +200,10 @@ void handleWSMessage() {
 }
 
 void slideinto() {
+  Serial.print("Current position: ");
+  Serial.println(current);
+  Serial.print("Setpoint: ");
+  Serial.println(setpoint);
   while (!kill && (setpoint != current)) {
     if (setpoint > current) {
       digitalWrite(dirPin, LOW);
@@ -209,6 +222,10 @@ void slideinto() {
       current--;
     }
   }
+  Serial.print("Current position: ");
+  Serial.println(current);
+  Serial.print("Setpoint: ");
+  Serial.println(setpoint);
 }
 
 void calibrate() {
@@ -244,13 +261,9 @@ void calibrate() {
   }
   delay(250);
   length = temp;
-  // update the current position which we know is the
+  // update the current position which we know is the length
   current = length;
-  setpoint = length / 2;
-  slideinto(); // go to the midpoint
-  // re-enable interrupts
-  attachInterrupt(rLim, rLimISR, FALLING);
-  attachInterrupt(lLim, lLimISR, FALLING);
+  kill = true; // set this back to true
   Serial.println("Done");
   Serial.print("Length: ");
   Serial.println(temp);
