@@ -272,5 +272,6 @@ void calibrate() {
 
   Serial.print("Slider length: ");
   Serial.println(temp);
-  current = 0;
+  
+  current = 0; // we know the position is now zero
 }
