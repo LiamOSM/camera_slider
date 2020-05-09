@@ -138,5 +138,9 @@ void loop() {
 // This function is called when a websocket request is
 // received and the String "wsMessageStr" is updated
 void handleWSMessage() {
-
+  if (wsMessageStr.charAt(0) == 'm') {
+    int goTo = wsMessageStr.substring(1).toInt();
+    Serial.print("Go To: ");
+    Serial.println(goTo);
+  }
 }
