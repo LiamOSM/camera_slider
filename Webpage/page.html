@@ -37,6 +37,7 @@ var timeSpan1;
 var timeSpan2;
 
 var calibrateBtn;
+var homeBtn;
 
 var state;
 var stateSpan;
@@ -77,6 +78,7 @@ function init() {
   timeSpan2.innerHTML = "Time: "
 
   calibrateBtn = document.getElementById("calibrateBtn");
+  homeBtn = document.getElementById("homeBtn");
 
   // initial values:
   speedSlider.value = 50;
@@ -207,6 +209,16 @@ function currentToStart(){
 
 function currentToEnd(){
   endField.value = slider.value;
+}
+
+function calibrate(){
+  doSend("c");
+}
+
+function home(){
+  slider.value = 0;
+  sliderValue.innerHTML = 0;
+  doSend("h");
 }
 
 function toggleSpeedType(){
@@ -392,6 +404,13 @@ Version 1.1
         <span id="speedSpan"></span>
         <br>
         <button id="speedTypeBtn" onclick="toggleSpeedType()">Switch to Time</button>
+      </center>
+    </p>
+
+    <p>
+      <center>
+        <button id="calibrateBtn" onclick="calibrate()">Calibrate</button>
+        <button id="homeBtn" onclick="home()">Home</button>
       </center>
     </p>
 

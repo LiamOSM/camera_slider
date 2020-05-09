@@ -194,12 +194,27 @@ void handleWSMessage() {
   else if (wsMessageStr.charAt(0) == 'c') {
     calibrate();
   }
+  else if (wsMessageStr.charAt(0) == 'h') {
+    homePosition();
+  }
 }
 
 // call this function on startup and if the client requests a move to position zero
-void homePosition(){
-  // move in the home direction until the limit switch is triggered
-  // set the current position to zero  
+void homePosition() {
+  detachInterrupt(rLim);
+  detachInterrupt(lLim);
+  digitalWrite(enPin, LOW);
+
+  // Move right until limit switch is reached
+  digitalWrite(dirPin, HIGH);
+  while (digitalRead(rLim) != 0) {
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(calSpeed);
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(calSpeed);
+  }
+  current = 0;
+  setpoint = 0;
 }
 
 void calibrate() {
@@ -219,9 +234,9 @@ void calibrate() {
     delayMicroseconds(calSpeed);
   }
   delay(250);
-  
+
   // move left
-  digitalWrite(dirPin, LOW); 
+  digitalWrite(dirPin, LOW);
   while (digitalRead(lLim) != 0) {
     // move left until the limit is reached, while counting steps
     digitalWrite(stepPin, HIGH);
@@ -233,11 +248,11 @@ void calibrate() {
   delay(250);
   sliderLength = temp;
   Serial.println("Done.");
-  
-  EEPROM.put(0,sliderLength);
+
+  EEPROM.put(0, sliderLength);
   EEPROM.commit();
   Serial.println("Length put in EEPROM");
-  
+
   Serial.print("Slider length: ");
   Serial.println(temp);
 }
