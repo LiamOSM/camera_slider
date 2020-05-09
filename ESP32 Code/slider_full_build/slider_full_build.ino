@@ -35,7 +35,7 @@ String wsMessageStr;
 // Interrupt service routines
 void IRAM_ATTR rLimISR() { // zero position (home)
   current = 0;
-  kill = true;
+  // kill = true;
   //Serial.println(current);
 }
 void IRAM_ATTR lLimISR() { // positive limit
@@ -165,8 +165,9 @@ void setup() {
   webSocket.onEvent(onWebSocketEvent);
 
   calibrate();
+  kill = false;
   // freewheel
-  digitalWrite(enPin, HIGH);
+  //  digitalWrite(enPin, HIGH);
 }
 
 void loop() {
@@ -180,10 +181,33 @@ void handleWSMessage() {
     int goTo = wsMessageStr.substring(1).toInt();
     Serial.print("Go To: ");
     Serial.println(goTo);
+    setpoint = goTo;
+    slideinto();
   }
   else if (wsMessageStr.charAt(0) == 'c') {
     // calibrate
 
+  }
+}
+
+void slideinto() {
+  while (!kill && (setpoint != current)) {
+    if (setpoint > current) {
+      digitalWrite(dirPin, LOW);
+      digitalWrite(stepPin, HIGH);
+      delayMicroseconds(speed);
+      digitalWrite(stepPin, LOW);
+      delayMicroseconds(speed);
+      current++;
+    }
+    else if (setpoint < current) {
+      digitalWrite(dirPin, HIGH);
+      digitalWrite(stepPin, HIGH);
+      delayMicroseconds(speed);
+      digitalWrite(stepPin, LOW);
+      delayMicroseconds(speed);
+      current--;
+    }
   }
 }
 
@@ -220,7 +244,10 @@ void calibrate() {
   }
   delay(250);
   length = temp;
+  // update the current position which we know is the
   current = length;
+  setpoint = length / 2;
+  slideinto(); // go to the midpoint
   // re-enable interrupts
   attachInterrupt(rLim, rLimISR, FALLING);
   attachInterrupt(lLim, lLimISR, FALLING);

@@ -349,7 +349,7 @@ Version 1.1
   <p>
     <center>
       <button id="jogLeftBtn" onmousedown="jogLeftStart()" onmouseup="jogLeftEnd()">&#8592</button>
-      <input id="slider" type="range" min="0" max="1000" step="1" oninput="sliderChanged()" value="69" class="positionSlider">
+      <input id="slider" type="range" min="0" max="1000" step="1" onmouseup="sliderChanged()" ontouchend="sliderChanged()" value="69" class="positionSlider">
       <button id="jogRightBtn" onmousedown="jogRightStart()" onmouseup="jogRightEnd()">&#8594</button>
     </center>
   </p>
