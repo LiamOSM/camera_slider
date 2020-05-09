@@ -23,7 +23,7 @@ long sliderLength = 0;
 long setpoint = 0;
 long current = 0;
 int speed = 50;
-int calSpeed = 25;
+int calSpeed = 30;
 bool kill = true;
 
 
@@ -40,7 +40,7 @@ void IRAM_ATTR rLimISR() { // zero position (home)
   //Serial.println(current);
 }
 void IRAM_ATTR lLimISR() { // positive limit
-  current = length;
+  current = sliderLength;
   // kill = true;
   // Serial.println(current);
 }
@@ -186,10 +186,11 @@ void loop() {
 // received and the String "wsMessageStr" is updated
 void handleWSMessage() {
   if (wsMessageStr.charAt(0) == 'm') {
-    long goTo = 100 * wsMessageStr.substring(1).toInt();
+    long newSetpoint = 100 * wsMessageStr.substring(1).toInt();
     Serial.print("Go To: ");
-    Serial.println(goTo);
-    setpoint = goTo;
+    Serial.println(newSetpoint);
+    setpoint = newSetpoint;
+    goTo();
   }
   else if (wsMessageStr.charAt(0) == 'c') {
     calibrate();
@@ -197,6 +198,22 @@ void handleWSMessage() {
   else if (wsMessageStr.charAt(0) == 'h') {
     homePosition();
   }
+}
+
+void goTo() {
+  long delta = current - setpoint;
+  delta = abs(delta);
+  if (setpoint > current)
+    digitalWrite(dirPin, LOW);
+  else
+    digitalWrite(dirPin, HIGH);
+  for (long i = 0; i < delta; i++) {
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(calSpeed);
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(calSpeed);
+  }
+  current = setpoint;
 }
 
 // call this function on startup and if the client requests a move to position zero
