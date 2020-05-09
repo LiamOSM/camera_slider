@@ -272,4 +272,5 @@ void calibrate() {
 
   Serial.print("Slider length: ");
   Serial.println(temp);
+  current = 0;
 }
