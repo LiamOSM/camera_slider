@@ -274,4 +274,9 @@ void calibrate() {
   Serial.println(temp);
   
   current = 0; // we know the position is now zero
+
+  // TODO: After calibrating, the webpage must be updated since the maximum distance
+  // in millimetres has changed. The limits on the start & end textboxes must also change
+  // If this is too challenging, the webpage could be modified to just work in percent
+  // so the values don't need to be updated on calibration.
 }
