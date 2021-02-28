@@ -4,7 +4,7 @@
 #include <WebSocketsServer.h>
 #include <EEPROM.h>
 
-// Compile-time assertions
+// Pin Definitions
 #define enPin 19
 #define dirPin 18
 #define stepPin 5

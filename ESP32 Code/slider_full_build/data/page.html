@@ -193,6 +193,12 @@ function jogRightEnd() {
 
 function run(){
   setState(1); // running state is 1
+  if(speedTypeBtn.innerText == "Switch to Time"){
+    doSend("s" + speedSlider.value);
+  }
+  else{
+    doSend("t" + timeField.value);
+  }
 }
 
 function pause(){
@@ -348,7 +354,7 @@ th, td {
 }
 </style>
 Version 1.2
-<center><h2>Position: <span id="sliderValue"></span> mm</h2></center>
+<center><h2>Position: <span id="sliderValue"></span>%</h2></center>
 <center><strong>Status: </strong><span id="stateSpan"></span></center>
 <center>
   <button id="runBtn" onclick="run()">Run</button>
@@ -361,7 +367,7 @@ Version 1.2
   <p>
     <center>
       <button id="jogLeftBtn" onmousedown="jogLeftStart()" onmouseup="jogLeftEnd()">&#8592</button>
-      <input id="slider" type="range" min="0" max="1000" step="1" onmouseup="sliderChanged()" ontouchend="sliderChanged()" value="69" class="positionSlider">
+      <input id="slider" type="range" min="0" max="100" step="0.1" onmouseup="sliderChanged()" ontouchend="sliderChanged()" value="69" class="positionSlider">
       <button id="jogRightBtn" onmousedown="jogRightStart()" onmouseup="jogRightEnd()">&#8594</button>
     </center>
   </p>
@@ -374,7 +380,7 @@ Version 1.2
           <label for="loopNoneRadio">No Loop</label>
         </td>
         <td>Start:</td>
-        <td><input type="number" id="startField" name="startField" min="0" max="1000" step="1" value="0"></td>
+        <td><input type="number" id="startField" name="startField" min="0" max="100" step="0.1" value="0"></td>
         <td><button id="currentToStartBtn" onclick="currentToStart()">&#8592 set to current</button></td>
       </tr>
       <tr>
@@ -383,7 +389,7 @@ Version 1.2
           <label for="loopOnceRadio">Loop Once</label>
         </td>
         <td>End:</td>
-        <td><input type="number" id="endField" name="endField" min="0" max="1000" step="1" value="1000"></td>
+        <td><input type="number" id="endField" name="endField" min="0" max="100" step="0.1" value="100"></td>
         <td><button id="currentToEndBtn" onclick="currentToEnd()">&#8592 set to current</button></td>
       </tr>
       <tr>
