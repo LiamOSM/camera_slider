@@ -186,7 +186,7 @@ void loop() {
 // received and the String "wsMessageStr" is updated
 void handleWSMessage() {
   if (wsMessageStr.charAt(0) == 'm') {
-    long newSetpoint = 100 * wsMessageStr.substring(1).toInt();
+    unsigned long newSetpoint = (sliderLength * wsMessageStr.substring(1).toInt()) / 100;
     Serial.print("Go To: ");
     Serial.println(newSetpoint);
     setpoint = newSetpoint;
