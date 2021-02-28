@@ -48,7 +48,7 @@ function init() {
   // Assign page elements to variables
   slider = document.getElementById("slider");
   sliderValue = document.getElementById("sliderValue");
-  sliderValue.innerHTML = 69;
+  sliderValue.innerHTML = 0;
 
   stateSpan = document.getElementById("stateSpan");
 
@@ -173,7 +173,7 @@ function jogLeftStart() {
 }
 
 function jogLeftEnd() {
-  clearInterval(counter)
+  clearInterval(counter);
 }
 
 function jogRightStart() {
@@ -188,7 +188,7 @@ function jogRightStart() {
 }
 
 function jogRightEnd() {
-  clearInterval(counter)
+  clearInterval(counter);
 }
 
 function run(){
@@ -199,14 +199,27 @@ function run(){
   else{
     doSend("t" + timeField.value);
   }
+  doSend("g" + startField.value);
+  doSend("f" + endField.value);
+  if(loopNoneRadio.checked){
+    deSend("l0");
+  }
+  else if(loopOnceRadio.checked){
+    deSend("l1");
+  }
+  else{
+    deSend("l2");
+  }
 }
 
 function pause(){
   setState(2); // paused state is 2
+  doSend("p");
 }
 
 function stop(){
   setState(0); // idle state is 0
+  doSend("k");
 }
 
 function currentToStart(){
@@ -367,7 +380,7 @@ Version 1.2
   <p>
     <center>
       <button id="jogLeftBtn" onmousedown="jogLeftStart()" onmouseup="jogLeftEnd()">&#8592</button>
-      <input id="slider" type="range" min="0" max="100" step="0.1" onmouseup="sliderChanged()" ontouchend="sliderChanged()" value="69" class="positionSlider">
+      <input id="slider" type="range" min="0" max="100" step="1" onmouseup="sliderChanged()" ontouchend="sliderChanged()" value="0" class="positionSlider">
       <button id="jogRightBtn" onmousedown="jogRightStart()" onmouseup="jogRightEnd()">&#8594</button>
     </center>
   </p>
@@ -380,7 +393,7 @@ Version 1.2
           <label for="loopNoneRadio">No Loop</label>
         </td>
         <td>Start:</td>
-        <td><input type="number" id="startField" name="startField" min="0" max="100" step="0.1" value="0"></td>
+        <td><input type="number" id="startField" name="startField" min="0" max="100" step="1" value="0"></td>
         <td><button id="currentToStartBtn" onclick="currentToStart()">&#8592 set to current</button></td>
       </tr>
       <tr>
@@ -389,7 +402,7 @@ Version 1.2
           <label for="loopOnceRadio">Loop Once</label>
         </td>
         <td>End:</td>
-        <td><input type="number" id="endField" name="endField" min="0" max="100" step="0.1" value="100"></td>
+        <td><input type="number" id="endField" name="endField" min="0" max="100" step="1" value="100"></td>
         <td><button id="currentToEndBtn" onclick="currentToEnd()">&#8592 set to current</button></td>
       </tr>
       <tr>
