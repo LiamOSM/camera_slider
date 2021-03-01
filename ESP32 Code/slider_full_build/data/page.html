@@ -246,6 +246,7 @@ function toggleSpeedType(){
 
 function speedSliderChanged(){
   speedSpan.innerHTML = "Speed: " + speedSlider.value + "%";
+  doSend("s" + speedSlider.value);
 }
 
 function timeFieldChanged(){

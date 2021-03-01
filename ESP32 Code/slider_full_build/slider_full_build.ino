@@ -17,6 +17,8 @@ const char *password =  "123456789";
 const int dns_port = 53;
 const int http_port = 80;
 const int ws_port = 1024;
+const int maxTravelSpeed = 1000;
+const int minTravelSpeed = 25;
 
 // Global Variables
 long sliderLength = 0;
@@ -198,6 +200,10 @@ void handleWSMessage() {
   else if (wsMessageStr.charAt(0) == 'h') {
     homePosition();
   }
+  else if (wsMessageStr.charAt(0) == 's') {
+    // map the speed as a percentage to the travel speed delay value (microsecs)
+    travelSpeed = map(wsMessageStr.substring(1).toInt(), 0, 100, maxTravelSpeed, minTravelSpeed);
+  }
 }
 
 void goTo() {
@@ -222,10 +228,10 @@ void goTo() {
     }
     delta = current - setpoint;
     delta = abs(delta);
-//    Serial.print("Current: ");
-//    Serial.print(current);
-//    Serial.print(", Setpoint = ");
-//    Serial.println(setpoint);
+    //    Serial.print("Current: ");
+    //    Serial.print(current);
+    //    Serial.print(", Setpoint = ");
+    //    Serial.println(setpoint);
     digitalWrite(stepPin, HIGH);
     delayMicroseconds(travelSpeed);
     digitalWrite(stepPin, LOW);
