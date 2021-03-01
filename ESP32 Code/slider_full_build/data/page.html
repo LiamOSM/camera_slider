@@ -226,6 +226,7 @@ function home(){
 function toggleSpeedType(){
   // user specifies a time in minutes
   if(speedTypeBtn.innerText == "Switch to Time"){
+    doSend("t" + timeField.value);
     speedTypeBtn.innerText = "Switch to Speed";
     speedSlider.hidden = true;
     speedSpan.hidden = true;
@@ -235,6 +236,7 @@ function toggleSpeedType(){
   }
   // user specifies a speed in percent
   else{
+    doSend("s" + speedSlider.value);
     speedTypeBtn.innerText = "Switch to Time";
     speedSlider.hidden = false;
     speedSpan.hidden = false;
@@ -256,6 +258,7 @@ function timeFieldChanged(){
   else {
     timeSpan1.innerHTML = " mins";
   }
+  doSend("t" + timeField.value);
 }
 
 function setState(newState){

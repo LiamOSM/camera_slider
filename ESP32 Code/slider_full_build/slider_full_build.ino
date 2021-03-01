@@ -26,6 +26,7 @@ long setpoint = 0;
 long current = 0;
 int travelSpeed = 50;
 int calSpeed = 30;
+int loopMode = 0; // 0 = no loop, 1 = loop once, 3 = loop forever
 bool kill = false;
 
 
