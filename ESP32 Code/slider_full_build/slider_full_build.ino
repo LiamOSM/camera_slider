@@ -22,9 +22,9 @@ const int ws_port = 1024;
 long sliderLength = 0;
 long setpoint = 0;
 long current = 0;
-int speed = 50;
+int travelSpeed = 50;
 int calSpeed = 30;
-bool kill = true;
+bool kill = false;
 
 
 AsyncWebServer server(80);
@@ -35,14 +35,14 @@ String wsMessageStr;
 
 // Interrupt service routines
 void IRAM_ATTR rLimISR() { // zero position (home)
-  current = 0;
-  // kill = true;
+  //current = 0;
+  //  Serial.print("R-limit switch hit, current = ");
   //Serial.println(current);
 }
 void IRAM_ATTR lLimISR() { // positive limit
-  current = sliderLength;
-  // kill = true;
-  // Serial.println(current);
+  //current = sliderLength;
+  //  Serial.print("L-limit switch hit, current = ");
+  //Serial.println(current);
 }
 
 // Callback: receiving any WebSocket message
@@ -186,7 +186,7 @@ void loop() {
 // received and the String "wsMessageStr" is updated
 void handleWSMessage() {
   if (wsMessageStr.charAt(0) == 'm') {
-    unsigned long newSetpoint = (sliderLength * wsMessageStr.substring(1).toInt()) / 100;
+    long newSetpoint = (sliderLength * wsMessageStr.substring(1).toInt()) / 100;
     Serial.print("Go To: ");
     Serial.println(newSetpoint);
     setpoint = newSetpoint;
@@ -201,17 +201,23 @@ void handleWSMessage() {
 }
 
 void goTo() {
+  if (setpoint > sliderLength)
+    setpoint = sliderLength;
   long delta = current - setpoint;
-  delta = abs(delta);
+  delta = abs(delta); // <- don't combine this with the line above, the abs function is whack
   if (setpoint > current)
     digitalWrite(dirPin, LOW);
   else
     digitalWrite(dirPin, HIGH);
   for (long i = 0; i < delta; i++) {
+    Serial.print("Current: ");
+    Serial.print(current);
+    Serial.print(", Setpoint = ");
+    Serial.println(setpoint);
     digitalWrite(stepPin, HIGH);
-    delayMicroseconds(calSpeed);
+    delayMicroseconds(travelSpeed);
     digitalWrite(stepPin, LOW);
-    delayMicroseconds(calSpeed);
+    delayMicroseconds(travelSpeed);
   }
   current = setpoint;
 }
@@ -232,6 +238,8 @@ void homePosition() {
   }
   current = 0;
   setpoint = 0;
+  attachInterrupt(rLim, rLimISR, FALLING);
+  attachInterrupt(lLim, lLimISR, FALLING);
 }
 
 void calibrate() {
@@ -272,8 +280,11 @@ void calibrate() {
 
   Serial.print("Slider length: ");
   Serial.println(temp);
-  
+
   current = 0; // we know the position is now zero
+
+  attachInterrupt(rLim, rLimISR, FALLING);
+  attachInterrupt(lLim, lLimISR, FALLING);
 
   // TODO: After calibrating, the webpage must be updated since the maximum distance
   // in millimetres has changed. The limits on the start & end textboxes must also change
