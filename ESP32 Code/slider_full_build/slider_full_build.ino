@@ -209,17 +209,23 @@ void goTo() {
     digitalWrite(dirPin, LOW);
   else
     digitalWrite(dirPin, HIGH);
-  for (long i = 0; i < delta; i++) {
-    Serial.print("Current: ");
-    Serial.print(current);
-    Serial.print(", Setpoint = ");
-    Serial.println(setpoint);
+  while (delta > 0) {
+    delta = current - setpoint;
+    delta = abs(delta);
+//    Serial.print("Current: ");
+//    Serial.print(current);
+//    Serial.print(", Setpoint = ");
+//    Serial.println(setpoint);
     digitalWrite(stepPin, HIGH);
     delayMicroseconds(travelSpeed);
     digitalWrite(stepPin, LOW);
     delayMicroseconds(travelSpeed);
+    if (current < setpoint)
+      current++;
+    else
+      current--;
   }
-  current = setpoint;
+  //current = setpoint;
 }
 
 // call this function on startup and if the client requests a move to position zero
