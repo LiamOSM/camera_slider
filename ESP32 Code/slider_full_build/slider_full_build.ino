@@ -201,15 +201,25 @@ void handleWSMessage() {
 }
 
 void goTo() {
+  int dir;
   if (setpoint > sliderLength)
     setpoint = sliderLength;
   long delta = current - setpoint;
   delta = abs(delta); // <- don't combine this with the line above, the abs function is whack
   if (setpoint > current)
-    digitalWrite(dirPin, LOW);
+    dir = 0;
   else
-    digitalWrite(dirPin, HIGH);
+    dir = 1;
+  digitalWrite(dirPin, dir);
   while (delta > 0) {
+    if (dir && digitalRead(rLim) == LOW) {
+      current = 0;
+      break;
+    }
+    else if (!dir && digitalRead(lLim) == LOW) {
+      current = sliderLength;
+      break;
+    }
     delta = current - setpoint;
     delta = abs(delta);
 //    Serial.print("Current: ");
