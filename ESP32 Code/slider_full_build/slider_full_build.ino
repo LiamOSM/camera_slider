@@ -27,6 +27,9 @@ long current = 0;
 int travelSpeed = 50;
 int calSpeed = 30;
 int loopMode = 0; // 0 = no loop, 1 = loop once, 3 = loop forever
+unsigned long timeSpeed = 0; // in seconds
+bool useTime = false;
+
 bool kill = false;
 
 
@@ -204,20 +207,54 @@ void handleWSMessage() {
   else if (wsMessageStr.charAt(0) == 's') {
     // map the speed as a percentage to the travel speed delay value (microsecs)
     travelSpeed = map(wsMessageStr.substring(1).toInt(), 0, 100, maxTravelSpeed, minTravelSpeed);
+    Serial.print("travelSpeed = ");
+    Serial.println(travelSpeed);
+    useTime = false;
+  }
+  else if (wsMessageStr.charAt(0) == 't') {
+    // time is given instead of a speed
+    // speed must be calculated when a run command is received
+    timeSpeed = wsMessageStr.substring(1).toInt(); // seconds
+    timeSpeed = constrain(timeSpeed, 10, 300); // limit to be between 1 min and 5 mins
+    Serial.print("timeSpeed = ");
+    Serial.println(timeSpeed);
+    useTime = true;
   }
 }
 
 void goTo() {
   int dir;
+  long tempSpeed;
+
   if (setpoint > sliderLength)
     setpoint = sliderLength;
+
   long delta = current - setpoint;
   delta = abs(delta); // <- don't combine this with the line above, the abs function is whack
+  if(delta == 0)
+    return;
+  
+  if (useTime) {
+    // total time in ms is delta*2*tempSpeed
+    // therefore tempSpeed = 1000*1000*timeSpeed/delta/2
+    tempSpeed = 500000 * timeSpeed / delta;
+  }
+  else {
+    tempSpeed = travelSpeed;
+  }
+
+  if(tempSpeed >= 500000)
+    return;
+  
+  Serial.print("tempSpeed = ");
+  Serial.println(tempSpeed);
+
   if (setpoint > current)
     dir = 0;
   else
     dir = 1;
   digitalWrite(dirPin, dir);
+
   while (delta > 0) {
     if (dir && digitalRead(rLim) == LOW) {
       current = 0;
@@ -234,9 +271,9 @@ void goTo() {
     //    Serial.print(", Setpoint = ");
     //    Serial.println(setpoint);
     digitalWrite(stepPin, HIGH);
-    delayMicroseconds(travelSpeed);
+    delayMicroseconds(tempSpeed);
     digitalWrite(stepPin, LOW);
-    delayMicroseconds(travelSpeed);
+    delayMicroseconds(tempSpeed);
     if (current < setpoint)
       current++;
     else
