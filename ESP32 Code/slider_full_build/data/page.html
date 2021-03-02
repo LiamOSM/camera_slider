@@ -193,6 +193,10 @@ function jogRightEnd() {
 
 function run(){
   setState(1); // running state is 1
+  slider.value = endField.value;
+  sliderValue.innerHTML = endField.value;
+  doSend("m" + startField.value);
+  doSend("r" + endField.value);
 }
 
 function pause(){
@@ -287,6 +291,8 @@ function setState(newState){
       speedSlider.disabled = false;
       speedTypeBtn.disabled = false;
       timeField.disabled = false;
+      calibrateBtn.disabled = false;
+      homeBtn.disabled = false;
       break;
     case 1:
       stateSpan.innerHTML = "Running";
@@ -307,6 +313,8 @@ function setState(newState){
       speedSlider.disabled = true;
       speedTypeBtn.disabled = true;
       timeField.disabled = true;
+      calibrateBtn.disabled = true;
+      homeBtn.disabled = true;
       break;
     case 2:
       stateSpan.innerHTML = "Paused";
@@ -327,6 +335,8 @@ function setState(newState){
       speedSlider.disabled = true;
       speedTypeBtn.disabled = true;
       timeField.disabled = true;
+      calibrateBtn.disabled = true;
+      homeBtn.disabled = true;
       break;
     default:
       stateSpan.innerHTML = "Error";

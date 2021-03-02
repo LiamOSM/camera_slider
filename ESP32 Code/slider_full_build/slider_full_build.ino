@@ -193,10 +193,17 @@ void loop() {
 void handleWSMessage() {
   if (wsMessageStr.charAt(0) == 'm') {
     long newSetpoint = (sliderLength * wsMessageStr.substring(1).toInt()) / 100;
-    Serial.print("Go To: ");
+    Serial.print("Rapid To: ");
     Serial.println(newSetpoint);
     setpoint = newSetpoint;
-    goTo();
+    goTo(0);
+  }
+  else if (wsMessageStr.charAt(0) == 'r') {
+    long newSetpoint = (sliderLength * wsMessageStr.substring(1).toInt()) / 100;
+    Serial.print("Move To: ");
+    Serial.println(newSetpoint);
+    setpoint = newSetpoint;
+    goTo(1);
   }
   else if (wsMessageStr.charAt(0) == 'c') {
     calibrate();
@@ -222,7 +229,7 @@ void handleWSMessage() {
   }
 }
 
-void goTo() {
+void goTo(int travelType) {
   int dir;
   long tempSpeed;
 
@@ -231,21 +238,25 @@ void goTo() {
 
   long delta = current - setpoint;
   delta = abs(delta); // <- don't combine this with the line above, the abs function is whack
-  if(delta == 0)
+  if (delta == 0)
     return;
-  
-  if (useTime) {
-    // total time in ms is delta*2*tempSpeed
-    // therefore tempSpeed = 1000*1000*timeSpeed/delta/2
-    tempSpeed = 500000 * timeSpeed / delta;
-  }
-  else {
-    tempSpeed = travelSpeed;
-  }
 
-  if(tempSpeed >= 500000)
+  if (travelType == 0) { // rapid travel speed
+    tempSpeed = calSpeed;
+  }
+  else { // precision travel speed
+    if (useTime) {
+      // total time in ms is delta*2*tempSpeed
+      // therefore tempSpeed = 1000*1000*timeSpeed/delta/2
+      tempSpeed = 500000 * timeSpeed / delta;
+    }
+    else {
+      tempSpeed = travelSpeed;
+    }
+  }
+  if (tempSpeed >= 500000)
     return;
-  
+
   Serial.print("tempSpeed = ");
   Serial.println(tempSpeed);
 
