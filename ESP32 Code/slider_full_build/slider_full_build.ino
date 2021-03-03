@@ -274,7 +274,6 @@ void goTo(int travelType) {
     else
       current--;
   }
-  //current = setpoint;
 }
 
 // call this function on startup and if the client requests a move to position zero
