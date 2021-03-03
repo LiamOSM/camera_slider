@@ -8,7 +8,7 @@
 #define enPin 19
 #define dirPin 18
 #define stepPin 5
-#define rLim 22
+#define rLim 21
 #define lLim 23
 
 // Constants
@@ -274,6 +274,7 @@ void goTo(int travelType) {
     else
       current--;
   }
+
 }
 
 // call this function on startup and if the client requests a move to position zero
@@ -282,7 +283,7 @@ void homePosition() {
 
   // Move right until limit switch is reached
   digitalWrite(dirPin, HIGH);
-  while (digitalRead(rLim) != 0) {
+  while (digitalRead(rLim) != LOW) {
     digitalWrite(stepPin, HIGH);
     delayMicroseconds(calSpeed);
     digitalWrite(stepPin, LOW);
@@ -337,4 +338,8 @@ void calibrate() {
   // in millimetres has changed. The limits on the start & end textboxes must also change
   // If this is too challenging, the webpage could be modified to just work in percent
   // so the values don't need to be updated on calibration.
+
+  // bidirectional communication has proved very difficult
+  // idea: remove all the fancy looping modes and just make it loop indefinitely
+  // remove the pause button, just have a stop button which ends the looping
 }
