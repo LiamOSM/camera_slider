@@ -24,8 +24,8 @@ const int minTravelSpeed = 25;
 long sliderLength = 0;
 long setpoint = 0;
 long current = 0;
-int travelSpeed = 50;
-int calSpeed = 30;
+int travelSpeed = 25;
+int calSpeed = 25;
 int loopMode = 0; // 0 = no loop, 1 = loop once, 3 = loop forever
 unsigned long timeSpeed = 0; // in seconds
 bool useTime = false;
@@ -38,18 +38,6 @@ WebSocketsServer webSocket = WebSocketsServer(ws_port);
 char msg_buf[10];
 
 String wsMessageStr;
-
-// Interrupt service routines
-void IRAM_ATTR rLimISR() { // zero position (home)
-  //current = 0;
-  //  Serial.print("R-limit switch hit, current = ");
-  //Serial.println(current);
-}
-void IRAM_ATTR lLimISR() { // positive limit
-  //current = sliderLength;
-  //  Serial.print("L-limit switch hit, current = ");
-  //Serial.println(current);
-}
 
 // Callback: receiving any WebSocket message
 void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size_t length) {
@@ -178,10 +166,6 @@ void setup() {
 
   // No need to calibrate on every power cycle since length comes from EEPROM
   // calibrate();
-
-  // enable interrupts for limit switches
-  attachInterrupt(rLim, rLimISR, FALLING);
-  attachInterrupt(lLim, lLimISR, FALLING);
 }
 
 void loop() {
@@ -295,8 +279,6 @@ void goTo(int travelType) {
 
 // call this function on startup and if the client requests a move to position zero
 void homePosition() {
-  detachInterrupt(rLim);
-  detachInterrupt(lLim);
   digitalWrite(enPin, LOW);
 
   // Move right until limit switch is reached
@@ -309,14 +291,11 @@ void homePosition() {
   }
   current = 0;
   setpoint = 0;
-  attachInterrupt(rLim, rLimISR, FALLING);
-  attachInterrupt(lLim, lLimISR, FALLING);
 }
 
 void calibrate() {
   Serial.print("Calibrating...");
-  detachInterrupt(rLim);
-  detachInterrupt(lLim);
+
   digitalWrite(enPin, LOW);
   unsigned long temp = 0;
 
@@ -354,8 +333,6 @@ void calibrate() {
 
   current = 0; // we know the position is now zero
 
-  attachInterrupt(rLim, rLimISR, FALLING);
-  attachInterrupt(lLim, lLimISR, FALLING);
 
   // TODO: After calibrating, the webpage must be updated since the maximum distance
   // in millimetres has changed. The limits on the start & end textboxes must also change

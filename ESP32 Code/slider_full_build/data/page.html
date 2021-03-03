@@ -81,7 +81,7 @@ function init() {
   homeBtn = document.getElementById("homeBtn");
 
   // initial values:
-  speedSlider.value = 50;
+  speedSlider.value = 100;
   loopNoneRadio.checked = true;
   speedSpan.innerHTML = "Speed: " + speedSlider.value + "%";
   timeSpan1.innerHTML = " secs";
@@ -141,6 +141,7 @@ function onClose(evt) {
 // Called when a message is received from the server
 function onMessage(evt) {
   // the message is called "evt.data"
+
 }
 
 // Called when a WebSocket error occurs
