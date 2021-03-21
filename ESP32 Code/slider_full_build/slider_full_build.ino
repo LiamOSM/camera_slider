@@ -1,3 +1,19 @@
+// VERSION 1.3
+/*  Fully functional!
+ *  Step 1. Connect to the wifi network called "Slider" with the password "123456789"
+ *  Step 2. In a browser, go to 192.168.4.1
+ *  Step 3. Press the "Calibrate" button (only necessary on the first startup)
+ *  Step 4. Press the "Home" button
+ *  A webpage with a large HTML slider will appear. Moving this slider will
+ *  cause the motorized gantry to move in real-time. The arrow buttons on each
+ *  end of the HTML slider allow for fine adjustment of its position.
+ *  The start and end points can be set with the respective text fields, or by
+ *  pressing "set to current". The speed can be set as a percentage (this appears
+ *  by default) or as a time duration by first pressing "switch to time". Once the
+ *  start point, end point, and time/speed are set, press the "run" button to make
+ *  the slider perform the requested movement. 
+ */
+
 #include <WiFi.h>
 #include <SPIFFS.h>
 #include <ESPAsyncWebServer.h>
@@ -12,13 +28,15 @@
 #define lLim 23
 
 // Constants
-const char *ssid = "ESP32";
+const char *ssid = "Slider";
 const char *password =  "123456789";
 const int dns_port = 53;
 const int http_port = 80;
 const int ws_port = 1024;
 const int maxTravelSpeed = 1000;
 const int minTravelSpeed = 25;
+const int maxTime = 600;
+const int minTime = 10;
 
 // Global Variables
 long sliderLength = 0;
@@ -26,12 +44,8 @@ long setpoint = 0;
 long current = 0;
 int travelSpeed = 25;
 int calSpeed = 25;
-int loopMode = 0; // 0 = no loop, 1 = loop once, 3 = loop forever
 unsigned long timeSpeed = 0; // in seconds
 bool useTime = false;
-
-bool kill = false;
-
 
 AsyncWebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(ws_port);
@@ -206,7 +220,7 @@ void handleWSMessage() {
     // time is given instead of a speed
     // speed must be calculated when a run command is received
     timeSpeed = wsMessageStr.substring(1).toInt(); // seconds
-    timeSpeed = constrain(timeSpeed, 10, 300); // limit to be between 1 min and 5 mins
+    timeSpeed = constrain(timeSpeed, minTime, maxTime); // limit to be between 1 min and 5 mins
     Serial.print("timeSpeed = ");
     Serial.println(timeSpeed);
     useTime = true;
@@ -333,13 +347,4 @@ void calibrate() {
 
   current = 0; // we know the position is now zero
 
-
-  // TODO: After calibrating, the webpage must be updated since the maximum distance
-  // in millimetres has changed. The limits on the start & end textboxes must also change
-  // If this is too challenging, the webpage could be modified to just work in percent
-  // so the values don't need to be updated on calibration.
-
-  // bidirectional communication has proved very difficult
-  // idea: remove all the fancy looping modes and just make it loop indefinitely
-  // remove the pause button, just have a stop button which ends the looping
 }
