@@ -15,10 +15,6 @@ var jogLeftBtn;
 var jogRightBtn;
 var counter;
 
-var loopNoneRadio;
-var loopOnceRadio;
-var loopForeverRadio;
-
 var startField;
 var currentToStartBtn;
 var endField;
@@ -26,8 +22,6 @@ var currentToEndBtn;
 var swapBtn;
 
 var runBtn;
-var pauseBtn;
-var stopBtn;
 
 var speedTypeBtn;
 var timeField;
@@ -39,25 +33,16 @@ var timeSpan2;
 var calibrateBtn;
 var homeBtn;
 
-var state;
-var stateSpan;
-
 // This is called when the page finishes loading
 function init() {
 
   // Assign page elements to variables
   slider = document.getElementById("slider");
   sliderValue = document.getElementById("sliderValue");
-  sliderValue.innerHTML = 69;
-
-  stateSpan = document.getElementById("stateSpan");
+  sliderValue.innerHTML = 50;
 
   jogLeftBtn = document.getElementById("jogLeftBtn");
   jogRightBtn = document.getElementById("jogRightBtn");
-
-  loopNoneRadio = document.getElementById("loopNoneRadio");
-  loopOnceRadio = document.getElementById("loopOnceRadio");
-  loopForeverRadio = document.getElementById("loopForeverRadio");
 
   startField = document.getElementById("startField");
   currentToStartBtn = document.getElementById("currentToStartBtn");
@@ -66,8 +51,6 @@ function init() {
   swapBtn = document.getElementById("swapBtn");
 
   runBtn = document.getElementById("runBtn");
-  pauseBtn = document.getElementById("pauseBtn");
-  stopBtn = document.getElementById("stopBtn");
 
   speedTypeBtn = document.getElementById("speedTypeBtn");
   timeField = document.getElementById("timeField");
@@ -81,24 +64,15 @@ function init() {
   homeBtn = document.getElementById("homeBtn");
 
   // initial values:
-  speedSlider.value = 50;
-  loopNoneRadio.checked = true;
+  speedSlider.value = 100;
   speedSpan.innerHTML = "Speed: " + speedSlider.value + "%";
-  timeSpan1.innerHTML = " mins";
+  timeSpan1.innerHTML = " secs";
   timeField.hidden = true;
   timeSpan1.hidden = true;
   timeSpan2.hidden = true;
-  stop();
 
-  // enable run & reset, disable pause
+  // enable run button
   runBtn.disabled = false;
-  pauseBtn.disabled = true;
-  stopBtn.disabled = true;
-
-  // remove above three lines and uncomment below three lines
-  // runBtn.disabled = true;
-  // pauseBtn.disabled = true;
-  // stopBtn.disabled = true;
 
   // Connect to WebSocket server
   wsConnect(url);
@@ -119,20 +93,16 @@ function wsConnect(url) {
 
 // Called when a WebSocket connection is established with the server
 function onOpen(evt) {
-  // enable buttons
-  // enable run & reset, disable pause
+  // enable run button
   runBtn.disabled = false;
-  pauseBtn.disabled = true;
-  stopBtn.disabled = true;
 }
 
 // Called when the WebSocket connection is closed
 function onClose(evt) {
 
-  // Disable buttons
-  // runBtn.disabled = true;
-  // pauseBtn.disabled = true;
-  // stopBtn.disabled = true;
+  // rip!
+  // Disable run button
+  runBtn.disabled = true;
 
   // Try to reconnect after a few seconds
   setTimeout(function() { wsConnect(url) }, 2000);
@@ -141,6 +111,7 @@ function onClose(evt) {
 // Called when a message is received from the server
 function onMessage(evt) {
   // the message is called "evt.data"
+  // this is not currently being used
 }
 
 // Called when a WebSocket error occurs
@@ -192,15 +163,10 @@ function jogRightEnd() {
 }
 
 function run(){
-  setState(1); // running state is 1
-}
-
-function pause(){
-  setState(2); // paused state is 2
-}
-
-function stop(){
-  setState(0); // idle state is 0
+  slider.value = endField.value;
+  sliderValue.innerHTML = endField.value;
+  doSend("m" + startField.value);
+  doSend("r" + endField.value);
 }
 
 function currentToStart(){
@@ -212,6 +178,8 @@ function currentToEnd(){
 }
 
 function calibrate(){
+  slider.value = 0;
+  sliderValue.innerHTML = 0;
   doSend("c");
 }
 
@@ -222,8 +190,9 @@ function home(){
 }
 
 function toggleSpeedType(){
-  // user specifies a time in minutes
   if(speedTypeBtn.innerText == "Switch to Time"){
+    // user specifies a travel time in seconds
+    doSend("t" + timeField.value);
     speedTypeBtn.innerText = "Switch to Speed";
     speedSlider.hidden = true;
     speedSpan.hidden = true;
@@ -231,8 +200,9 @@ function toggleSpeedType(){
     timeSpan1.hidden = false;
     timeSpan2.hidden = false;
   }
-  // user specifies a speed in percent
   else{
+    // user specifies a travel speed in percent
+    doSend("s" + speedSlider.value);
     speedTypeBtn.innerText = "Switch to Time";
     speedSlider.hidden = false;
     speedSpan.hidden = false;
@@ -244,91 +214,20 @@ function toggleSpeedType(){
 
 function speedSliderChanged(){
   speedSpan.innerHTML = "Speed: " + speedSlider.value + "%";
+  doSend("s" + speedSlider.value);
 }
 
 function timeFieldChanged(){
   if(timeField.value == "1"){
-    timeSpan1.innerHTML = " min";
+    timeSpan1.innerHTML = " second";
   }
   else {
-    timeSpan1.innerHTML = " mins";
+    timeSpan1.innerHTML = " seconds";
   }
-}
-
-function setState(newState){
-  // States:
-  // 0 = idle
-  // 1 = running
-  // 2 = paused
-  state = newState;
-  switch(state) {
-    case 0:
-      stateSpan.innerHTML = "Idle";
-      // enable run & reset, disable pause
-      runBtn.disabled = false;
-      pauseBtn.disabled = true;
-      stopBtn.disabled = true;
-      currentToEndBtn.disabled = false;
-      currentToStartBtn.disabled = false;
-      endField.disabled = false;
-      startField.disabled = false;
-      loopNoneRadio.disabled = false;
-      loopOnceRadio.disabled = false;
-      loopForeverRadio.disabled = false;
-      slider.disabled = false;
-      jogLeftBtn.disabled = false;
-      jogRightBtn.disabled = false;
-      speedSlider.disabled = false;
-      speedTypeBtn.disabled = false;
-      timeField.disabled = false;
-      break;
-    case 1:
-      stateSpan.innerHTML = "Running";
-      // enable run & reset, disable pause
-      runBtn.disabled = true;
-      pauseBtn.disabled = false;
-      stopBtn.disabled = true;
-      currentToEndBtn.disabled = true;
-      currentToStartBtn.disabled = true;
-      endField.disabled = true;
-      startField.disabled = true;
-      loopNoneRadio.disabled = true;
-      loopOnceRadio.disabled = true;
-      loopForeverRadio.disabled = true;
-      slider.disabled = true;
-      jogLeftBtn.disabled = true;
-      jogRightBtn.disabled = true;
-      speedSlider.disabled = true;
-      speedTypeBtn.disabled = true;
-      timeField.disabled = true;
-      break;
-    case 2:
-      stateSpan.innerHTML = "Paused";
-      // enable run & reset, disable pause
-      runBtn.disabled = false;
-      pauseBtn.disabled = true;
-      stopBtn.disabled = false;
-      currentToEndBtn.disabled = true;
-      currentToStartBtn.disabled = true;
-      endField.disabled = true;
-      startField.disabled = true;
-      loopNoneRadio.disabled = true;
-      loopOnceRadio.disabled = true;
-      loopForeverRadio.disabled = true;
-      slider.disabled = true;
-      jogLeftBtn.disabled = true;
-      jogRightBtn.disabled = true;
-      speedSlider.disabled = true;
-      speedTypeBtn.disabled = true;
-      timeField.disabled = true;
-      break;
-    default:
-      stateSpan.innerHTML = "Error";
-  }
+  doSend("t" + timeField.value);
 }
 
 </script>
-
 
 <!-- The actual webpage HTML is below -->
 
@@ -347,21 +246,15 @@ th, td {
   padding: 5px;
 }
 </style>
-Version 1.2
-<center><h2>Position: <span id="sliderValue"></span> mm</h2></center>
-<center><strong>Status: </strong><span id="stateSpan"></span></center>
-<center>
-  <button id="runBtn" onclick="run()">Run</button>
-  <button id="pauseBtn" onclick="pause()">Pause</button>
-  <button id="stopBtn" onclick="stop()">Stop</button>
-</center>
+Version 1.3
+<center><h2>Position: <span id="sliderValue"></span>%</h2></center>
+<center><button id="runBtn" onclick="run()">Run</button></center>
 
 <body>
-
   <p>
     <center>
       <button id="jogLeftBtn" onmousedown="jogLeftStart()" onmouseup="jogLeftEnd()">&#8592</button>
-      <input id="slider" type="range" min="0" max="1000" step="1" onmouseup="sliderChanged()" ontouchend="sliderChanged()" value="69" class="positionSlider">
+      <input id="slider" type="range" min="0" max="100" step="1" onmouseup="sliderChanged()" ontouchend="sliderChanged()" value="50" class="positionSlider">
       <button id="jogRightBtn" onmousedown="jogRightStart()" onmouseup="jogRightEnd()">&#8594</button>
     </center>
   </p>
@@ -369,28 +262,14 @@ Version 1.2
   <div class="main">
     <table>
       <tr>
-        <td>
-          <input type="radio" id="loopNoneRadio" name="loopGroup" value="loop1">
-          <label for="loopNoneRadio">No Loop</label>
-        </td>
         <td>Start:</td>
-        <td><input type="number" id="startField" name="startField" min="0" max="1000" step="1" value="0"></td>
+        <td><input type="number" id="startField" name="startField" min="0" max="100" step="1" value="0"></td>
         <td><button id="currentToStartBtn" onclick="currentToStart()">&#8592 set to current</button></td>
       </tr>
       <tr>
-        <td>
-          <input type="radio" id="loopOnceRadio" name="loopGroup" value="loop2">
-          <label for="loopOnceRadio">Loop Once</label>
-        </td>
         <td>End:</td>
-        <td><input type="number" id="endField" name="endField" min="0" max="1000" step="1" value="1000"></td>
+        <td><input type="number" id="endField" name="endField" min="0" max="100" step="1" value="100"></td>
         <td><button id="currentToEndBtn" onclick="currentToEnd()">&#8592 set to current</button></td>
-      </tr>
-      <tr>
-        <td>
-          <input type="radio" id="loopForeverRadio" name="loopGroup" value="loop3">
-          <label for="loopForeverRadio">Loop Forever</label>
-        </td>
       </tr>
     </table>
 
@@ -398,7 +277,7 @@ Version 1.2
       <center>
         <input id="speedSlider" type="range" min="1" max="100" step="1" oninput="speedSliderChanged()">
         <span id="timeSpan2"></span>
-        <input type="number" id="timeField" name="timeField" min="1" max="60" step="1" value="5" onchange="timeFieldChanged()">
+        <input type="number" id="timeField" name="timeField" min="10" max="600" step="1" value="30" onchange="timeFieldChanged()">
         <span id="timeSpan1"></span>
         <br>
         <span id="speedSpan"></span>
